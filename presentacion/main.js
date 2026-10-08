@@ -337,7 +337,8 @@ scene("sala", (idx) => {
     ]);
     const modalPie = add([
         text("S para cerrar  ·  ←/→ cambiar de sala", { size: 20, font: FONT_CUERPO }),
-        pos(88, 636),
+        pos(1172, 636),
+        anchor("right"),
         color("#8a93c4"),
         z(502),
         fixed(),
@@ -348,7 +349,7 @@ scene("sala", (idx) => {
             size: 14,
             width: 1104,
             font: FONT_CODIGO,
-            lineSpacing: 4,
+            lineSpacing: 2,
             styles: STYLES_CODIGO,
         }),
         pos(88, 118),

@@ -211,28 +211,23 @@ onKeyPress("up", saltar);
         reto: "Retos · en tu starter, al terminar el bloque: añade un 5.º enemigo con patrulla VERTICAL (igual que el horizontal, pero moviendo pos.y con su propio desde/hasta).",
         controles: "A/D: mover · ESPACIO: saltar",
         snippetDonde: "SNIPPET · pégalo en scene(\"juego\") tras tus 4 crearEnemigo · es tu TODO 2",
-        codigo: `// 1) PISOTÓN — en un onUpdate dentro de crearEnemigo (tras la patrulla):
-const pies = jugador.pos.y + jugador.height;
-if (jugando && jugador.vel.y >= 0            // sin salto hacia arriba
-  && jugador.pos.x < e.pos.x + e.width       // solape horizontal…
-  && jugador.pos.x + jugador.width > e.pos.x
-  && pies > e.pos.y - 6                      // …tocando su cara superior
-  && pies < e.pos.y + e.height / 2) {        // …y por encima del centro
+        codigo: `const pies = jugador.pos.y + jugador.height;
+if (jugando && jugador.vel.y >= 0
+ && jugador.pos.x < e.pos.x + e.width
+ && jugador.pos.x + jugador.width > e.pos.x
+ && pies > e.pos.y - 6
+ && pies < e.pos.y + e.height / 2) {
   const py = e.pos.y, d = e.desde, h = e.hasta;
   e.destroy();
   wait(2, () => { if (!jugando) return;
     const lejos = jugador.pos.x < (d+h)/2 ? h : d;
     crearEnemigo(lejos, py, d, h); });
 }
-// 2) El choque de LADO sí llega por onCollide: pierdes.
 onCollide("jugador", "enemigo", () => {
-  if (!jugando) return;
   jugando = false; go("gameover", puntos);
 })`,
-        solucion: `// TODO 2 · la colisión (crearEnemigo: esqueleto en tu starter, quita los //)
-// PISOTÓN por solape, dentro de crearEnemigo tras la patrulla.
-// (onCollide NO ve el aterrizaje vertical: KAPLAY lo resuelve sin
-// disparar el choque, y el disparo llega tarde/mal → mira la geometría)
+        solucion: `// TODO 2 · pisotón por SOLAPE dentro de crearEnemigo (onCollide no
+// ve el aterrizaje vertical: KAPLAY lo resuelve sin disparar el choque)
 const pies = jugador.pos.y + jugador.height;
 if (jugando && jugador.vel.y >= 0 && jugador.exists()
   && jugador.pos.x < e.pos.x + e.width
@@ -240,14 +235,12 @@ if (jugando && jugador.vel.y >= 0 && jugador.exists()
   && pies > e.pos.y - 6 && pies < e.pos.y + e.height / 2) {
   const py = e.pos.y, d = e.desde, h = e.hasta;
   e.destroy();
-  wait(2, () => { if (!jugando) return;   // reaparece a los 2 s…
-    const lejos = jugador.pos.x < (d+h)/2 ? h : d;  // …lejos de ti
+  wait(2, () => { if (!jugando) return;
+    const lejos = jugador.pos.x < (d+h)/2 ? h : d;
     crearEnemigo(lejos, py, d, h); });
 }
-
-// El choque de LADO sí llega por onCollide (fuera de crearEnemigo):
+// Choque de LADO → onCollide (fuera de crearEnemigo):
 onCollide("jugador", "enemigo", () => {
-  if (!jugando) return;
   jugando = false; go("gameover", puntos);
 });
 
