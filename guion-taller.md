@@ -124,8 +124,10 @@ aunque falte algo, y lo que sobre se pega:
 
 # DÍA 2 — 2 h · guiado por equipos
 
-**Se proyecta** `presentacion-dia2/index.html` (6 salas: teoría, snippet y la
-ficha de DEMO EN VIVO; la tecla **`S`** abre la solución del bloque).
+**Se proyecta** `presentacion-dia2/index.html` (6 salas: teoría, snippet y una
+**micro-demo conceptual jugable** en el recuadro derecho — una por concepto, con
+su leyenda de teclas; la tecla **`S`** abre la solución del bloque, con **zoom**
+— rueda del ratón o `+/−` — y scroll `↑/↓`).
 
 **Archivo de trabajo:** `solucion-dia2-lite/main.js` es el **kit de bloques** (una
 partida completa y jugable): cada sección está marcada con su etiqueta `▸ D2-n`
