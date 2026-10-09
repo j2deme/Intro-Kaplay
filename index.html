@@ -86,13 +86,20 @@
       letter-spacing: .05em;
       color: var(--acento);
       text-align: center;
-      margin: 30px 0 4px;
+      margin: 40px 0 0;
+    }
+    .subtitulo {
+      text-align: center;
+      color: var(--suave);
+      font-size: 14.5px;
+      margin: 4px 0 0;
     }
     .tarjetas {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(290px, 460px));
+      justify-content: center;
       gap: 14px;
-      margin: 18px 0 30px;
+      margin: 16px 0 0;
     }
     .tarjeta {
       display: flex;
@@ -154,7 +161,7 @@
       border: 1px solid var(--borde);
       border-radius: 14px;
       padding: 18px 20px;
-      margin-bottom: 16px;
+      margin: 16px 0;
     }
     .seccion h2 {
       font-family: "Happy", "Trebuchet MS", system-ui, sans-serif;
@@ -228,68 +235,82 @@
       </div>
     </header>
 
-    <h2 class="titulo-seccion">MATERIAL DEL TALLER</h2>
+    <section class="grupo" aria-label="Presentaciones del taller">
+      <h2 class="titulo-seccion">PRESENTACIONES</h2>
+      <p class="subtitulo">Lo que se proyecta en clase: hub + salas con micro-demos</p>
+      <div class="tarjetas">
+        <a class="tarjeta destacada" href="./presentacion-dia2/">
+          <img class="icono" src="./assets/sprites/gigagantrum.png" alt="" />
+          <div>
+            <h3>Juego-presentación · Día 2 <span class="etiqueta">DÍA 2</span></h3>
+            <p>Hub + 6 salas con micro-demos en vivo (sprites, mundo, vida, partículas y
+               jefe) y zoom en cada solución.</p>
+            <span class="ir">Jugar →</span>
+          </div>
+        </a>
 
-    <section class="tarjetas" aria-label="Accesos al material del taller">
-      <a class="tarjeta destacada" href="./presentacion-dia2/">
-        <img class="icono" src="./assets/sprites/gigagantrum.png" alt="" />
-        <div>
-          <h3>Juego-presentación · Día 2 <span class="etiqueta">DÍA 2</span></h3>
-          <p>Hub + 6 salas con micro-demos en vivo (sprites, mundo, vida, partículas y
-             jefe) y zoom en cada solución.</p>
-          <span class="ir">Jugar →</span>
-        </div>
-      </a>
+        <a class="tarjeta" href="./presentacion/">
+          <img class="icono" src="./assets/sprites/door.png" alt="" />
+          <div>
+            <h3>Juego-presentación · Día 1 <span class="etiqueta">DÍA 1</span></h3>
+            <p>Hub + 5 salas de teoría con retos y micro-demos jugables. La parte que
+               se proyecta el primer día.</p>
+            <span class="ir">Jugar →</span>
+          </div>
+        </a>
+      </div>
+    </section>
 
-      <a class="tarjeta" href="./presentacion/">
-        <img class="icono" src="./assets/sprites/door.png" alt="" />
-        <div>
-          <h3>Juego-presentación · Día 1 <span class="etiqueta">DÍA 1</span></h3>
-          <p>Hub + 5 salas de teoría con retos y micro-demos jugables. La parte que
-             se proyecta el primer día.</p>
-          <span class="ir">Jugar →</span>
-        </div>
-      </a>
+    <section class="grupo" aria-label="Material del taller">
+      <h2 class="titulo-seccion">MATERIAL DEL TALLER</h2>
+      <p class="subtitulo">Con lo que trabaja cada equipo durante las sesiones</p>
+      <div class="tarjetas">
+        <a class="tarjeta" href="./starter/">
+          <img class="icono" src="./assets/sprites/bean.png" alt="" />
+          <div>
+            <h3>Starter del equipo <span class="etiqueta">DÍA 1</span></h3>
+            <p>Plantilla con el escenario montado y 4 TODOs: es el juego que cada
+               equipo construye y conserva.</p>
+            <span class="ir">Abrir →</span>
+          </div>
+        </a>
 
-      <a class="tarjeta" href="./starter/">
-        <img class="icono" src="./assets/sprites/bean.png" alt="" />
-        <div>
-          <h3>Starter del equipo <span class="etiqueta">DÍA 1</span></h3>
-          <p>Plantilla con el escenario montado y 4 TODOs: es el juego que cada
-             equipo construye y conserva.</p>
-          <span class="ir">Abrir →</span>
-        </div>
-      </a>
+        <a class="tarjeta" href="./solucion-dia2-lite/">
+          <img class="icono" src="./assets/sprites/star.png" alt="" />
+          <div>
+            <h3>Kit Día 2 <span class="etiqueta">BLOQUES ▸ D2-n</span></h3>
+            <p>Kit de enseñanza: bloques reducidos para pegar en el starter mientras
+               el instructor va marcando el ritmo.</p>
+            <span class="ir">Abrir →</span>
+          </div>
+        </a>
+      </div>
+    </section>
 
-      <a class="tarjeta" href="./solucion-dia1/">
-        <img class="icono" src="./assets/sprites/heart.png" alt="" />
-        <div>
-          <h3>Solución Día 1 <span class="etiqueta">REFERENCIA</span></h3>
-          <p>El MVP completo (física, colisiones, marcador y victoria): plan B si un
-             equipo se queda atascado.</p>
-          <span class="ir">Abrir →</span>
-        </div>
-      </a>
+    <section class="grupo" aria-label="Soluciones del taller">
+      <h2 class="titulo-seccion">SOLUCIONES</h2>
+      <p class="subtitulo">Referencia y plan B al final de cada día</p>
+      <div class="tarjetas">
+        <a class="tarjeta" href="./solucion-dia1/">
+          <img class="icono" src="./assets/sprites/heart.png" alt="" />
+          <div>
+            <h3>Solución Día 1 <span class="etiqueta">REFERENCIA</span></h3>
+            <p>El MVP completo (física, colisiones, marcador y victoria): plan B si un
+               equipo se queda atascado.</p>
+            <span class="ir">Abrir →</span>
+          </div>
+        </a>
 
-      <a class="tarjeta" href="./solucion-dia2-lite/">
-        <img class="icono" src="./assets/sprites/star.png" alt="" />
-        <div>
-          <h3>Kit Día 2 <span class="etiqueta">BLOQUES ▸ D2-n</span></h3>
-          <p>Kit de enseñanza: bloques reducidos para pegar en el starter mientras
-             el instructor va marcando el ritmo.</p>
-          <span class="ir">Abrir →</span>
-        </div>
-      </a>
-
-      <a class="tarjeta" href="./solucion-dia2/">
-        <img class="icono" src="./assets/sprites/sun.png" alt="" />
-        <div>
-          <h3>Solución completa Día 2 <span class="etiqueta">DEMO</span></h3>
-          <p>La referencia final con parallax, jefe, partículas y récord local: todo
-             etiquetado para ver qué pega y qué se escribe.</p>
-          <span class="ir">Abrir →</span>
-        </div>
-      </a>
+        <a class="tarjeta" href="./solucion-dia2/">
+          <img class="icono" src="./assets/sprites/sun.png" alt="" />
+          <div>
+            <h3>Solución completa Día 2 <span class="etiqueta">DEMO</span></h3>
+            <p>La referencia final con parallax, jefe, partículas y récord local: todo
+               etiquetado para ver qué pega y qué se escribe.</p>
+            <span class="ir">Abrir →</span>
+          </div>
+        </a>
+      </div>
     </section>
 
     <section class="seccion" aria-label="El taller en una línea">
