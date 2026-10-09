@@ -306,13 +306,69 @@ crearEnemigo(1000, 492, 930, 1120);  // plataforma 3 (545 − 53)
 //   const px = m.pos.x, py = m.pos.y;
 //   m.destroy(); sumar(50, px, py); play("pickup");
 // });`,
-        demoTitulo: "sprites en el kit",
-        pasos: [
-            "Abre solucion-dia2-lite y pulsa R: mismo código, otra cara.",
-            "En tu archivo: copia la lista de loads.",
-            "Cambia rect → sprite en jugador y en crearEnemigo.",
-            "Ajusta la «y» de los 4 enemigos (borde − 53).",
-        ],
+        // Micro-demo conceptual: el mismo objeto en rect y en sprite, con
+        // los pies clavados en el suelo — la "y" cambia porque cambia la caja.
+        controles: "A/D: mover · ESPACIO: rect ↔ sprite",
+        demo(box) {
+            const { x, y, w, h } = box;
+            const sueloY = y + h - 44;
+            let usandoSprite = false;
+            let px = x + w / 2 - 30;
+
+            add([rect(w, 44), pos(x, sueloY), color("#2b3370")]);
+
+            const info = add([
+                text("", { size: 16, font: F_COD, lineSpacing: 6 }),
+                pos(x + 14, y + 10),
+                color(PALETA.titulo),
+            ]);
+            function refrescarInfo() {
+                const ancho = usandoSprite ? 61 : 48;
+                const alto = usandoSprite ? 53 : 60;
+                info.text =
+                    (usandoSprite ? 'sprite("bean")' : "rect(48, 60)") +
+                    "  ·  area() → " + ancho + "×" + alto +
+                    "\ny = suelo " + Math.round(sueloY) + " − " + alto +
+                    " = " + Math.round(sueloY - alto);
+            }
+
+            let obj = null;
+            let caja = null;
+            function crear() {
+                if (obj) obj.destroy();
+                if (caja) caja.destroy();
+                const ancho = usandoSprite ? 61 : 48;
+                const alto = usandoSprite ? 53 : 60;
+                px = clamp(px, x + 8, x + w - ancho - 8); // el ancho cambió
+                // la caja de colisión, visible, ATRÁS del objeto:
+                // en el sprite se ve que mide 61×53 aunque la imagen no lo llene
+                caja = add([
+                    rect(ancho, alto),
+                    pos(px, sueloY - alto),
+                    color("#1d2a5e"),
+                    outline(2, rgb(PALETA.acento)),
+                ]);
+                obj = usandoSprite
+                    ? add([sprite("bean"), pos(px, sueloY - alto), area()])
+                    : add([rect(48, 60), pos(px, sueloY - 60), color(PALETA.acento), area()]);
+                refrescarInfo();
+            }
+            crear();
+
+            const mover = (dx) => {
+                const ancho = usandoSprite ? 61 : 48;
+                px = clamp(px + dx, x + 8, x + w - ancho - 8);
+                obj.pos.x = px;
+                caja.pos.x = px;
+            };
+            onKeyDown("a", () => mover(-240 * dt()));
+            onKeyDown("d", () => mover(240 * dt()));
+            onKeyPress("space", () => {
+                usandoSprite = !usandoSprite;
+                crear();
+                play("select");
+            });
+        },
     },
     // -------------------------------------------------------------- 3
     {
@@ -374,13 +430,79 @@ jugador.onUpdate(() => {
   jugador.pos.x = clamp(jugador.pos.x, 0, ANCHO_MUNDO - jugador.width);
   if (jugador.pos.y > 760) jugador.pos = vec2(80, 400);
 });`,
-        demoTitulo: "mundo y cámara en el kit",
-        pasos: [
-            "En el kit: camina a la derecha hasta el final del nivel.",
-            "La cámara viaja contigo; el HUD (fixed) no se mueve.",
-            "Pega el bloque en «1. Mundo» de tu archivo.",
-            "Recorre el nivel entero con R de principio a fin.",
-        ],
+        // Micro-demo conceptual: un nivel de 2 pantallas con cámara propia
+        // (offset manual con clamp, como setCamPos del kit) y HUD quieto.
+        controles: "A/D: mover · la cámara te sigue",
+        demo(box) {
+            const { x, y, w, h } = box;
+            const MUNDO = w * 2; // dos "pantallas" de nivel
+            const sueloY = h - 40; // y del suelo (relativa a la caja)
+            let bx = 0; // el bean en coordenadas de MUNDO
+            let camX = 0;
+            let llegado = false;
+            const mundoObjs = []; // [obj, wx]: lo que viaja con la cámara
+
+            function alMundo(o, wx) {
+                mundoObjs.push([o, wx]);
+                o.pos.x = x + wx - camX;
+                return o;
+            }
+
+            // suelo de todo el nivel + hierba mosaico encima
+            alMundo(add([rect(MUNDO, 40), pos(x, y + sueloY), color("#2b3370")]), 0);
+            for (let gx = 0; gx < MUNDO; gx += 64) {
+                alMundo(add([sprite("grass", { width: 64, height: 40 }), pos(x, y + sueloY)]), gx);
+            }
+            // marca de fin de la primera "pantalla"
+            alMundo(add([rect(2, h - 40), pos(x, y), color(PALETA.acento), opacity(0.35)]), w);
+            // plataformas del nivel (el de arriba, decorativo)
+            for (const [wx, ww] of [[260, 110], [720, 130]]) {
+                alMundo(
+                    add([rect(ww, 16), pos(x, y + 150), color("#3b4790"),
+                        outline(2, rgb(PALETA.panelBorder))]),
+                    wx,
+                );
+            }
+            // la puerta del final del mundo
+            alMundo(add([sprite("door", { width: 56, height: 70 }), pos(x, y + sueloY - 70)]), MUNDO - 78);
+
+            const bean = add([sprite("bean"), pos(x + bx, y + sueloY - 53), area()]);
+
+            // HUD: viaja en coordenadas de caja — quieto, como fixed() del kit
+            const hud = add([
+                text("", { size: 15, font: F_COD }),
+                pos(x + 14, y + 10),
+                color(PALETA.titulo),
+            ]);
+            const aviso = add([
+                text("¡LLEGASTE!", { size: 20, font: F_TITULO }),
+                pos(x + w - 14, y + 10),
+                anchor("right"),
+                color(PALETA.bien),
+                opacity(0),
+            ]);
+
+            onUpdate(() => {
+                if (isKeyDown("a")) bx -= 220 * dt();
+                if (isKeyDown("d")) bx += 220 * dt();
+                bx = clamp(bx, 0, MUNDO - 61);
+                // la cámara, con clamp dentro — el patrón del kit, a mano
+                camX = clamp(bx + 30 - w / 2, 0, MUNDO - w);
+                bean.pos.x = x + bx - camX;
+                for (const [o, wx] of mundoObjs) o.pos.x = x + wx - camX;
+                hud.text =
+                    "mundo " + MUNDO + " px · cámara x " + Math.round(camX) +
+                    "  (clamp 0…" + (MUNDO - w) + ")";
+                if (!llegado && bx >= MUNDO - 140) {
+                    llegado = true;
+                    aviso.opacity = 1;
+                    play("pickup");
+                } else if (llegado && bx < MUNDO - 300) {
+                    llegado = false;
+                    aviso.opacity = 0;
+                }
+            });
+        },
     },
     // -------------------------------------------------------------- 4
     {
