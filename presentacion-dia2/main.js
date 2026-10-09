@@ -66,6 +66,18 @@ const STYLES_CODIGO = {
     nu: { color: rgb(255, 209, 102) },
 };
 
+// ------------------------------------------------ zoom del modal de solución
+// Rueda del ratón o teclas +/− cambian el tamaño de la fuente; ↑/↓ hacen
+// scroll cuando el texto ya no cabe en el panel. El tamaño vive a nivel de
+// MÓDULO para que persista al cambiar de sala (go() recrea la escena, no esto).
+let tamModal = 14;
+const TAM_MIN = 9;
+const TAM_MAX = 22;
+const COD_X = 88; // margen izquierdo del código dentro del modal
+const COD_Y = 118; // línea superior del código
+const COD_W = 1104; // ancho útil (wrap)
+const COD_ALTO_DISP = 490; // del código al pie (y≈636 deja hueco)
+
 // ------------------------------------------------------------------ utils
 function medir(str, opts) {
     const o = make([text(str, opts)]);
@@ -324,7 +336,8 @@ scene("sala", (idx) => {
     ]);
 
     // ------------------------------------------------------ MODAL "S"
-    // Muestra la solución del bloque (el snippet resuelto y el reto).
+    // Muestra la solución del bloque. La fuente es ajustable en directo
+    // (rueda/+/−) y, si no cabe, ↑/↓ la desplazan.
     const modal = add([
         rect(1280, 720),
         pos(0, 0),
@@ -347,33 +360,81 @@ scene("sala", (idx) => {
         text("SOLUCIÓN · " + s.titulo, { size: 30, font: FONT_TITULO }),
         pos(88, 64),
         color(PALETA.titulo),
-        z(502),
+        z(504),
         fixed(),
         "modal",
     ]);
     const modalPie = add([
-        text("S para cerrar  ·  ←/→ cambiar de sala", { size: 20, font: FONT_CUERPO }),
+        text("", { size: 20, font: FONT_CUERPO }),
         pos(1172, 636),
         anchor("right"),
         color("#8a93c4"),
-        z(502),
+        z(504),
         fixed(),
         "modal",
     ]);
-    const modalCod = add([
-        text(resaltar(s.solucion), {
-            size: 12,
-            width: 1104,
-            font: FONT_CODIGO,
-            lineSpacing: 1,
-            styles: STYLES_CODIGO,
-        }),
-        pos(88, 118),
-        color(255, 255, 255),
-        z(502),
-        fixed(),
-        "modal",
-    ]);
+    // Cortes del "viewport" de código: tapan el texto que, al hacer scroll,
+    // se sale por arriba (encima del título) o por abajo (encima del pie).
+    // Negro fuera del recuadro, color de panel dentro — invisibles.
+    const modalCortes = [
+        add([rect(1280, 40), pos(0, 0), color(0, 0, 0), z(503), fixed(), "modal"]),
+        add([rect(1160, 78), pos(60, 40), color("#0a0d22"), z(503), fixed(), "modal"]),
+        add([rect(1160, 62), pos(60, 618), color("#0a0d22"), z(503), fixed(), "modal"]),
+        add([rect(1280, 40), pos(0, 680), color(0, 0, 0), z(503), fixed(), "modal"]),
+    ];
+    let modalCod = null;
+    let scrollCod = 0;
+    let modalAbierto = false;
+
+    function actualizarPie() {
+        modalPie.text =
+            "S cerrar · ↑↓ desplazar · rueda o +/−: tamaño (" + tamModal + ")";
+    }
+
+    // El texto de KAPLAY no cambia de tamaño in place: se recrea. Mantiene
+    // la opacidad actual y el scroll recortado al panel.
+    function pintarSolucion() {
+        if (modalCod) modalCod.destroy();
+        modalCod = add([
+            text(resaltar(s.solucion), {
+                size: tamModal,
+                width: COD_W,
+                font: FONT_CODIGO,
+                lineSpacing: tamModal <= 14 ? 1 : 4,
+                styles: STYLES_CODIGO,
+            }),
+            pos(COD_X, COD_Y - scrollCod),
+            color(255, 255, 255),
+            z(502),
+            fixed(),
+            "modal",
+        ]);
+        modalCod.opacity = modalAbierto ? 1 : 0;
+        recortarScroll();
+    }
+
+    function recortarScroll() {
+        const desborda = Math.max(0, modalCod.height - COD_ALTO_DISP);
+        scrollCod = clamp(scrollCod, 0, desborda);
+        modalCod.pos.y = COD_Y - scrollCod;
+    }
+
+    function moverScroll(d) {
+        if (!modalAbierto || !modalCod) return;
+        scrollCod = clamp(scrollCod + d, 0, Math.max(0, modalCod.height - COD_ALTO_DISP));
+        modalCod.pos.y = COD_Y - scrollCod;
+    }
+
+    function zoomModal(d) {
+        const nuevo = clamp(tamModal + d, TAM_MIN, TAM_MAX);
+        if (nuevo === tamModal) return;
+        tamModal = nuevo;
+        scrollCod = 0; // tamaño nuevo: volvemos arriba
+        pintarSolucion();
+        actualizarPie();
+        play("select");
+    }
+
     const modalOn = () => modal.opacity > 0;
 
     const toggleModal = (on) => {
@@ -383,14 +444,20 @@ scene("sala", (idx) => {
         modalTit.opacity = objetivo ? 1 : 0;
         modalPie.opacity = objetivo ? 1 : 0;
         modalCod.opacity = objetivo ? 1 : 0;
-        if (objetivo) play("select");
+        for (const c of modalCortes) c.opacity = objetivo ? 1 : 0;
+        if (objetivo) {
+            scrollCod = 0; // siempre se abre mirando el principio
+            modalCod.pos.y = COD_Y;
+            play("select");
+        }
     };
     // arranca oculto (opacidad 0 en los hijos)
     modalPanel.opacity = 0;
     modalTit.opacity = 0;
     modalPie.opacity = 0;
-    modalCod.opacity = 0;
-    let modalAbierto = false;
+    for (const c of modalCortes) c.opacity = 0;
+    pintarSolucion(); // crea modalCod oculto (modalAbierto = false)
+    actualizarPie();
 
     const ir = (n) => {
         const total = SALAS.length;
@@ -402,6 +469,18 @@ scene("sala", (idx) => {
         modalAbierto = !modalAbierto;
         toggleModal(modalAbierto);
     });
+    // Zoom del modal: rueda del ratón (arriba = agrandar) o teclas +/−.
+    // (= cubre los teclados donde + necesita Shift.)
+    onScroll((delta) => {
+        if (!modalAbierto || !delta || !delta.y) return;
+        zoomModal(delta.y < 0 ? 1 : -1);
+    });
+    onKeyPress("+", () => { if (modalAbierto) zoomModal(1); });
+    onKeyPress("=", () => { if (modalAbierto) zoomModal(1); });
+    onKeyPress("-", () => { if (modalAbierto) zoomModal(-1); });
+    // ↑/↓ desplazan el código si, con el tamaño actual, no cabe entero.
+    onKeyDown("up", () => moverScroll(-460 * dt()));
+    onKeyDown("down", () => moverScroll(460 * dt()));
     onKeyPress("escape", () => {
         // ESC: primero cierra el modal, después vuelve al mapa
         if (modalAbierto) {
