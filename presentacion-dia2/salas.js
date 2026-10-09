@@ -567,13 +567,211 @@ onCollide("jugador", "enemigo", (j, e) => {
   if (!e.exists() || !jugando || pisandolo(j, e)) return;
   danar(1, e.pos.x);
 });`,
-        demoTitulo: "vida y daño en el kit",
-        pasos: [
-            "Kit: camina hacia el primer enemigo y aguanta 3 toques.",
-            "3 golpes → GAME OVER; con vida sigues y parpadeas.",
-            "Corazón flotante en la plataforma 2: +1 vida.",
-            "En tu archivo: health + danar + corazones.",
-        ],
+        // Micro-demo conceptual: health() de verdad — corazones que se
+        // apagan, danar() con empujón, parpadeo de invulnerabilidad y
+        // corazón flotante que usa heal().
+        controles: "A/D: mover · ESPACIO: saltar · R: reiniciar",
+        demo(box) {
+            const { x, y, w, h } = box;
+            setGravity(2400);
+            const sueloY = y + h - 44;
+            let jugando = true;
+            let invulnerable = false;
+            let blinkTime = 0;
+
+            add([
+                rect(w, 44), pos(x, sueloY), color("#2b3370"),
+                area(), body({ isStatic: true }),
+            ]);
+
+            // HUD: etiqueta + tres corazones que se APAGAN (0.22), no se borran
+            add([text("VIDAS", { size: 16, font: F_COD }), pos(x + 14, y + 12), color(PALETA.titulo)]);
+            const corazones = [];
+            for (let i = 0; i < 3; i++) {
+                corazones.push(add([
+                    sprite("heart", { width: 30, height: 27 }),
+                    pos(x + 90 + i * 36, y + 6),
+                ]));
+            }
+            const avisoInv = add([
+                text("invulnerable 1 s", { size: 15, font: F_CUERPO }),
+                pos(x + w - 14, y + 10),
+                anchor("right"),
+                color(PALETA.acento),
+                opacity(0),
+            ]);
+
+            const jugador = add([
+                sprite("bean"),
+                pos(x + 70, y + 40),
+                area(),
+                body({ jumpForce: 750 }),
+                health(3, 3),
+                "jugador-demo",
+            ]);
+            function refrescarHud() {
+                const hp = jugador.hp();
+                corazones.forEach((c, i) => { c.opacity = i < hp ? 1 : 0.22; });
+            }
+            function flotar(txt, px, py) {
+                const t = add([
+                    text(txt, { size: 18, font: F_TITULO }),
+                    pos(px, py), anchor("center"),
+                    color(PALETA.bien), opacity(1),
+                    lifespan(0.8, { fade: 0.4 }),
+                ]);
+                t.onUpdate(() => { t.pos.y -= 70 * dt(); });
+            }
+
+            // MISMO guard que en tu archivo: ¿lo está pisando?
+            function pisandolo(j, e) {
+                return j.vel.y >= 0 && j.pos.y + j.height < e.pos.y + e.height / 2;
+            }
+            function crearEnemigo(px) {
+                const e = add([
+                    sprite("zombean"),
+                    pos(px, sueloY - 53),
+                    area(), body({ isStatic: true }),
+                    { dir: px < x + w / 2 ? 1 : -1, velocidad: 80 },
+                    "enemigo-demo",
+                ]);
+                e.onUpdate(() => {
+                    e.pos.x += e.dir * e.velocidad * dt();
+                    if (e.pos.x <= x + 8 || e.pos.x >= x + w - 69) {
+                        e.dir *= -1;
+                        e.pos.x = clamp(e.pos.x, x + 8, x + w - 69);
+                    }
+                    if (!jugando || !jugador.exists()) return;
+                    const pies = jugador.pos.y + jugador.height;
+                    if (
+                        jugador.vel.y >= 0 &&
+                        jugador.pos.x < e.pos.x + e.width &&
+                        jugador.pos.x + jugador.width > e.pos.x &&
+                        pies > e.pos.y - 6 &&
+                        pies < e.pos.y + e.height / 2
+                    ) {
+                        pisar(e);
+                    }
+                });
+                return e;
+            }
+            function pisar(e) {
+                const lejos = e.pos.x < x + w / 2;
+                e.destroy();
+                play("stomp");
+                jugador.jump(700);
+                wait(2, () => {
+                    if (jugando && get("enemigo-demo").length === 0) {
+                        crearEnemigo(lejos ? x + w - 69 : x + 12);
+                    }
+                });
+            }
+            crearEnemigo(x + w - 100);
+
+            // Feedback DENTRO de la caja (ni shake ni flash globales)
+            const marca = add([rect(w, h), pos(x, y), color("#ff2d55"), opacity(0)]);
+            const finCaja = add([
+                rect(320, 96, { radius: 12 }),
+                pos(x + w / 2, y + h / 2), anchor("center"),
+                color("#1c0a14"), outline(3, rgb("#ff2d55")),
+                opacity(0),
+            ]);
+            const finTxt = add([
+                text("SIN VIDAS\nR: reiniciar", {
+                    size: 24, align: "center", width: 300,
+                    font: F_TITULO, lineSpacing: 8,
+                }),
+                pos(x + w / 2, y + h / 2), anchor("center"),
+                color("#ff5c8a"), opacity(0),
+            ]);
+
+            // danar() — el bloque ▸ D2-3, aquí sin shake/flash
+            function danar(c, origenX) {
+                if (!jugando || invulnerable) return;
+                jugador.hurt(c);
+                invulnerable = true;
+                blinkTime = 0;
+                jugador.pos.x += jugador.pos.x < origenX ? -70 : 70; // empujón
+                jugador.jump(320);
+                play("hurt");
+                marca.opacity = 0.55;
+                tween(0.55, 0, 0.4, (v) => (marca.opacity = v));
+                refrescarHud();
+                if (jugador.hp() <= 0) {
+                    jugando = false;
+                    invulnerable = false; // muerto: ni parpadeo ni etiqueta
+                    get("corazon-item").forEach((c) => c.destroy()); // no tape la tarjeta
+                    finCaja.opacity = 1;
+                    finTxt.opacity = 1;
+                } else {
+                    wait(1, () => { invulnerable = false; blinkTime = 0; });
+                }
+            }
+            onCollide("jugador-demo", "enemigo-demo", (j, e) => {
+                if (!e.exists() || !jugando) return;
+                if (pisandolo(j, e)) return; // el pisotón lo resuelve
+                danar(1, e.pos.x);
+            });
+
+            // Corazón flotante: heal() solo cuando te falta vida
+            function soltarCorazon() {
+                if (!jugando || jugador.hp() >= 3 || get("corazon-item").length) return;
+                const baseY = y + 120;
+                const c = add([
+                    sprite("heart", { width: 30, height: 27 }),
+                    pos(x + w / 2 - 15, baseY),
+                    area(),
+                    "corazon-item",
+                ]);
+                c.onUpdate(() => { c.pos.y = baseY + Math.sin(time() * 3) * 8; });
+            }
+            onCollide("jugador-demo", "corazon-item", (j, c) => {
+                if (!jugando) return;
+                c.destroy();
+                jugador.heal(1);
+                play("heal");
+                refrescarHud();
+                flotar("+1 ♥", c.pos.x + 15, c.pos.y - 8);
+            });
+            soltarCorazon();
+            loop(7, soltarCorazon);
+
+            // controles + red de seguridad, como en tu archivo
+            onKeyDown("a", () => { if (jugando) jugador.pos.x -= 240 * dt(); });
+            onKeyDown("d", () => { if (jugando) jugador.pos.x += 240 * dt(); });
+            onKeyPress("space", () => {
+                if (jugando && jugador.isGrounded()) { jugador.jump(); play("jump"); }
+            });
+            jugador.onUpdate(() => {
+                jugador.pos.x = clamp(jugador.pos.x, x, x + w - jugador.width);
+                if (jugador.pos.y > y + h) jugador.pos = vec2(x + 70, y + 40);
+                // parpadeo mientras dure la invulnerabilidad
+                blinkTime += dt();
+                if (invulnerable) {
+                    jugador.opacity = Math.floor(blinkTime * 10) % 2 === 0 ? 1 : 0.3;
+                    avisoInv.opacity = 1;
+                } else {
+                    jugador.opacity = 1;
+                    avisoInv.opacity = 0;
+                }
+            });
+
+            onKeyPress("r", () => {
+                jugando = true;
+                invulnerable = false;
+                blinkTime = 0;
+                finCaja.opacity = 0;
+                finTxt.opacity = 0;
+                marca.opacity = 0;
+                jugador.pos = vec2(x + 70, y + 40);
+                jugador.vel.x = 0;
+                jugador.vel.y = 0;
+                jugador.heal(3); // health(3,3): vuelve a la completa
+                refrescarHud();
+                if (get("enemigo-demo").length === 0) crearEnemigo(x + w - 100);
+            });
+            refrescarHud(); // corazones con el hp real
+        },
     },
     // -------------------------------------------------------------- 5
     {
@@ -631,13 +829,84 @@ function estallar(px, py, n, colores) {
 // pisar():  estallar(px + 30, py + 26, 16, ["#ffd166", "#7cff6b"]);
 // escenas:  scene("gameover", (puntos = 0, record = 0) => { ... })
 //   text("PUNTOS: " + puntos + "   RÉCORD: " + record, ...)`,
-        demoTitulo: "chispas y récord en el kit",
-        pasos: [
-            "Kit: pisa un enemigo y mira la explosión de chispas.",
-            "Muere y vuelve a entrar: el récord persiste.",
-            "Pega estallar() y guardaRecord() en tu archivo.",
-            "Conecta estallar() en sumar() y en pisar().",
-        ],
+        // Micro-demo conceptual: estallar() con la textura sparkles y
+        // récord en localStorage con CLAVE PROPIA (no pisa la del kit).
+        controles: "ESPACIO: +100 con chispas · R: a 0 · F5: récord",
+        demo(box) {
+            const { x, y, w, h } = box;
+            const RECORD_KEY = "pres-dia2-demo-record";
+            let puntos = 0;
+
+            function leerRecord() { return Number(getData(RECORD_KEY) ?? 0); }
+            function guardaRecord(p) {
+                const antes = leerRecord();
+                if (p > antes) setData(RECORD_KEY, p);
+                return Math.max(antes, p);
+            }
+            function estallar(px, py, n, colores) {
+                const emisor = add([pos(px, py), particles({
+                    max: 80, texture: getSprite("sparkles").data.tex,
+                    speed: [70, 240], lifeTime: [0.35, 0.85],
+                    colors: colores.map((c) => rgb(c)),
+                    opacities: [1, 0], scales: [1.6, 0.3],
+                    angle: [0, 360], angularVelocity: [-240, 240],
+                }, { direction: 0, spread: 180 }), z(20)]);
+                emisor.emit(n);
+                wait(1.3, () => { if (emisor.exists()) emisor.destroy(); });
+            }
+
+            add([rect(w, 44), pos(x, y + h - 44), color("#2b3370")]);
+            const bean = add([sprite("bean"), pos(x + w / 2 - 30, y + h - 97)]);
+
+            const hud = add([
+                text("", { size: 16, font: F_COD }),
+                pos(x + 14, y + 10),
+                color(PALETA.titulo),
+            ]);
+            const avisoRec = add([
+                text("¡RÉCORD NUEVO!", { size: 18, font: F_TITULO }),
+                pos(x + w - 14, y + 10),
+                anchor("right"),
+                color(PALETA.bien),
+                opacity(0),
+            ]);
+            add([
+                text("El récord sobrevive a F5 y al cambio de sala", {
+                    size: 15, font: F_CUERPO,
+                }),
+                pos(x + 14, y + 40),
+                color("#8a93c4"),
+            ]);
+            function refrescarHud() {
+                hud.text = "PUNTOS: " + puntos + "   RÉCORD: " + leerRecord();
+            }
+            refrescarHud(); // el récord ya viejo aparece al entrar
+
+            onKeyPress("space", () => {
+                const antes = leerRecord();
+                puntos += 100;
+                const rec = guardaRecord(puntos); // ▸ D2-4
+                refrescarHud();
+                play("pickup");
+                estallar(bean.pos.x + 30, bean.pos.y - 6, 14, ["#ff5c8a", "#ffd166"]);
+                const f = add([
+                    text("+100", { size: 18, font: F_TITULO }),
+                    pos(bean.pos.x + 30, bean.pos.y - 10),
+                    anchor("center"),
+                    color(PALETA.bien), opacity(1),
+                    lifespan(0.8, { fade: 0.4 }),
+                ]);
+                f.onUpdate(() => { f.pos.y -= 70 * dt(); });
+                if (rec > antes) {
+                    avisoRec.opacity = 1;
+                    wait(1.4, () => { if (avisoRec.exists()) avisoRec.opacity = 0; });
+                }
+            });
+            onKeyPress("r", () => {
+                puntos = 0;
+                refrescarHud(); // el récord NO se toca
+            });
+        },
     },
     // -------------------------------------------------------------- 6
     {
