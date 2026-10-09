@@ -1,8 +1,10 @@
 // presentacion-dia2/salas.js
 // Contenido de las 6 salas del Día 2 (versión reducida).
 // Cada sala: 2 paneles de teoría (~30-40 palabras), 1 reto extra, 1 snippet
-// copiable y la ficha de DEMO EN VIVO (el instructor la demuestra desde
-// ../solucion-dia2-lite/, no hay micro-demo jugable propia).
+// copiable (lo que se pega en el starter) y una micro-demo conceptual en
+// `demo(box)` con su leyenda en `controles`: demuestra el MISMO efecto que
+// el snippet, dentro del recuadro derecho. El juego completo vive en
+// ../solucion-dia2-lite/ (kit) y ../solucion-dia2/ (jefe y parallax).
 //
 // Agenda: recap cierra el D1 · D2-1 sprites · D2-2 mundo/cámara ·
 // D2-3 vida/daño · D2-4 partículas/récord · D2-5⭐ jefe + showcase.

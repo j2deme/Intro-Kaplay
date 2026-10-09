@@ -1,9 +1,10 @@
 // presentacion-dia2/main.js
 // Juego-presentación del DÍA 2 (versión reducida): un hub top-down con 6
 // puertas (las 6 franjas de la agenda) y una escena por sala con teoría,
-// snippet copiable y la ficha de DEMO EN VIVO. A diferencia del Día 1, no
-// hay micro-demo jugable propia: las demos las hace el instructor desde
-// ../solucion-dia2-lite/ (el kit) y ../solucion-dia2/ (jefe y parallax).
+// snippet copiable y una micro-demo conceptual jugable en el recuadro
+// derecho — una por sala, con su leyenda de teclas. El modal "S" trae
+// zoom (rueda o +/−) y scroll (↑/↓). Las demos COMPLETAS las hace el
+// instructor desde ../solucion-dia2-lite/ (el kit) y ../solucion-dia2/.
 
 import kaplay from "https://unpkg.com/kaplay@3001.0.19/dist/kaplay.mjs";
 import { SALAS, PALETA } from "./salas.js";
@@ -28,9 +29,11 @@ loadRoot("../assets/");
 for (const nombre of ["bean", "door", "zombean", "grass", "heart", "sparkles", "gigagantrum"]) {
     loadSprite(nombre, "sprites/" + nombre + ".png");
 }
-for (const nombre of ["select", "jump", "stomp", "hurt", "pickup", "heal", "projectile", "boss-hit", "victory", "gameover"]) {
+for (const nombre of ["select", "jump", "stomp", "hurt", "pickup", "heal", "projectile", "victory", "gameover"]) {
     loadSound(nombre, "sounds/" + nombre + ".ogg");
 }
+// como en el kit: play("bosshit") sobre sounds/boss-hit.ogg
+loadSound("bosshit", "sounds/boss-hit.ogg");
 
 const FONT_TITULO = "happy";
 const FONT_CUERPO = "inter";
@@ -75,7 +78,8 @@ const STYLES_CODIGO = {
 // Rueda del ratón o teclas +/− cambian el tamaño de la fuente; ↑/↓ hacen
 // scroll cuando el texto ya no cabe en el panel. El tamaño vive a nivel de
 // MÓDULO para que persista al cambiar de sala (go() recrea la escena, no esto).
-let tamModal = 14;
+// El default es 13: con 14 la solución más larga (sala 4) se sale 19 px.
+let tamModal = 13;
 const TAM_MIN = 9;
 const TAM_MAX = 22;
 const COD_X = 88; // margen izquierdo del código dentro del modal
@@ -299,53 +303,19 @@ scene("sala", (idx) => {
 
     // La derecha: la micro-demo conceptual — el MISMO patrón que verán en
     // el kit, jugable aquí, con su leyenda de teclas arriba. El snippet de
-    // la izquierda es el código que produce ese efecto. (Mientras una sala
-    // no tenga demo, se muestra su ficha de pasos del kit.)
-    if (s.demo) {
-        add([
-            rect(580, BH, { radius: 12 }),
-            pos(664, BY),
-            color("#0c0f26"),
-            outline(2, rgb(PALETA.acento)),
-        ]);
-        add([
-            text("DEMO · " + s.controles, { size: 17, font: FONT_CUERPO }),
-            pos(680, BY + 12),
-            color(PALETA.acento),
-        ]);
-        s.demo({ x: 666, y: BY + 36, w: 576, h: BH - 38 });
-    } else {
-        add([
-            rect(580, BH, { radius: 12 }),
-            pos(664, BY),
-            color("#0c0f26"),
-            outline(2, rgb(PALETA.acento)),
-        ]);
-        add([
-            text("DEMO EN VIVO · " + s.demoTitulo, { size: 17, font: FONT_CUERPO }),
-            pos(680, BY + 12),
-            color(PALETA.acento),
-        ]);
-        add([
-            text(s.pasos.map((p, i) => (i + 1) + ". " + p).join("\n"), {
-                size: 19,
-                width: 548,
-                font: FONT_CUERPO,
-                lineSpacing: 8,
-            }),
-            pos(680, BY + 44),
-            color(PALETA.cuerpo),
-        ]);
-        add([
-            text("Fuente: ../solucion-dia2-lite/main.js  ·  etiqueta ▸", {
-                size: 16,
-                width: 548,
-                font: FONT_CODIGO,
-            }),
-            pos(680, BY + BH - 34),
-            color("#8a93c4"),
-        ]);
-    }
+    // la izquierda es el código que produce ese efecto.
+    add([
+        rect(580, BH, { radius: 12 }),
+        pos(664, BY),
+        color("#0c0f26"),
+        outline(2, rgb(PALETA.acento)),
+    ]);
+    add([
+        text("DEMO · " + s.controles, { size: 17, font: FONT_CUERPO }),
+        pos(680, BY + 12),
+        color(PALETA.acento),
+    ]);
+    s.demo({ x: 666, y: BY + 36, w: 576, h: BH - 38 });
 
     // pie
     add([
