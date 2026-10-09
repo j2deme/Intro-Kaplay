@@ -984,6 +984,10 @@ function golpeAlJefe() {
             let enfriamiento = 0;
             let impactos = 0;
             let loopDisp = null;
+            // loop() ejecuta su primer ciclo YA (lo hemos medido): sin este
+            // freno, el jefe dispara al entrar en la sala y el jugador
+            // arranca con un impacto fantasma antes de tocar nada.
+            let proximoDisparo = time() + 1.5;
 
             add([
                 rect(w, 44), pos(x, sueloY), color("#2b3370"),
@@ -1101,6 +1105,7 @@ function golpeAlJefe() {
 
             // Proyectil: sale del jefe hacia donde estás y NO sale de la caja
             function dispararProyectil() {
+                if (time() < proximoDisparo) return;
                 if (!jugando || derrotado || !jefe.exists()) return;
                 const dir = jugador.pos.x < jefe.pos.x ? -1 : 1;
                 const p = add([
@@ -1159,6 +1164,7 @@ function golpeAlJefe() {
                 derrotado = false;
                 enfriamiento = 0;
                 impactos = 0;
+                proximoDisparo = time() + 1.5; // esperar lo mismo tras reiniciar
                 impactosTxt.text = "IMPACTOS: 0";
                 victCaja.opacity = 0;
                 victTxt.opacity = 0;
