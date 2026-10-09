@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Taller KAPLAY · Snow Bros en 4 horas</title>
+  <meta name="description" content="Material del taller de KAPLAY: juego-presentaciones del Día 1 y Día 2, starter del equipo y soluciones. Sin git ni Node: solo navegador." />
+  <link rel="icon" href="./assets/sprites/bean.png" />
+  <style>
+    /* Fuente local del taller (sin CDNs nuevos) */
+    @font-face {
+      font-family: "Happy";
+      src: url("./assets/fonts/happy.ttf") format("truetype");
+      font-display: swap;
+    }
+
+    :root {
+      --bg: #07081a;
+      --panel: #0c0f26;
+      --sub: #10142f;
+      --borde: #2b3370;
+      --acento: #ffd166;
+      --texto: #c9d1f5;
+      --suave: #9aa3d0;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--texto);
+      font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+    }
+    a { color: var(--acento); }
+    .pagina { max-width: 1060px; margin: 0 auto; padding: 36px 20px 56px; }
+
+    /* ---------- cabecera ---------- */
+    .cabecera { position: relative; text-align: center; padding: 18px 0 6px; }
+    .cabecera h1 {
+      font-family: "Happy", "Trebuchet MS", system-ui, sans-serif;
+      font-weight: 400;
+      font-size: clamp(32px, 6.5vw, 56px);
+      letter-spacing: .05em;
+      color: var(--acento);
+      margin: 6px 0 4px;
+      text-shadow: 0 3px 0 #000a;
+    }
+    .cabecera .sub {
+      color: var(--suave);
+      font-size: clamp(15px, 2.4vw, 19px);
+      max-width: 660px;
+      margin: 0 auto 16px;
+    }
+    .insignias { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .insignia {
+      border: 1px solid var(--borde);
+      background: var(--panel);
+      color: var(--suave);
+      border-radius: 999px;
+      padding: 5px 13px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .02em;
+    }
+    .insignia b { color: var(--acento); font-weight: 700; }
+
+    /* sprites decorativos (pixel art del propio taller) */
+    .deco {
+      position: absolute;
+      image-rendering: pixelated;
+      user-select: none;
+      pointer-events: none;
+      filter: drop-shadow(0 4px 0 #0007);
+    }
+    .deco.bean  { width: 56px; left: 3%;  top: 36px; transform: rotate(-8deg); }
+    .deco.jefe  { width: 72px; right: 3%; top: 28px; transform: rotate(6deg); }
+    .deco.spark { width: 32px; right: 15%; top: -4px; }
+    @media (max-width: 820px) { .deco { display: none; } }
+
+    /* ---------- enlaces ---------- */
+    .titulo-seccion {
+      font-family: "Happy", "Trebuchet MS", system-ui, sans-serif;
+      font-weight: 400;
+      font-size: 24px;
+      letter-spacing: .05em;
+      color: var(--acento);
+      text-align: center;
+      margin: 30px 0 4px;
+    }
+    .tarjetas {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 14px;
+      margin: 18px 0 30px;
+    }
+    .tarjeta {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: var(--panel);
+      border: 1px solid var(--borde);
+      border-radius: 14px;
+      padding: 16px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+    }
+    .tarjeta:hover, .tarjeta:focus-visible {
+      transform: translateY(-3px);
+      border-color: var(--acento);
+      box-shadow: 0 6px 0 #0005;
+      outline: none;
+    }
+    .tarjeta .icono {
+      width: 54px;
+      height: 54px;
+      flex: none;
+      image-rendering: pixelated;
+      object-fit: contain;
+      background: var(--sub);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 6px;
+    }
+    .tarjeta h3 {
+      margin: 0 0 4px;
+      font-size: 17px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tarjeta p { margin: 0 0 8px; font-size: 14px; color: var(--suave); }
+    .ir { font-size: 13px; font-weight: 700; color: var(--acento); letter-spacing: .03em; }
+    .etiqueta {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      background: #1b2150;
+      color: var(--suave);
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+    .tarjeta.destacada { border-color: var(--acento); box-shadow: 0 0 18px #ffd16622; }
+    .tarjeta.destacada .etiqueta { background: var(--acento); color: #1a1405; border-color: var(--acento); }
+
+    /* ---------- secciones ---------- */
+    .seccion {
+      background: var(--panel);
+      border: 1px solid var(--borde);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+    .seccion h2 {
+      font-family: "Happy", "Trebuchet MS", system-ui, sans-serif;
+      font-weight: 400;
+      font-size: 22px;
+      letter-spacing: .05em;
+      color: var(--acento);
+      margin: 0 0 12px;
+    }
+    .dos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+    .dia { background: var(--sub); border: 1px solid var(--borde); border-radius: 10px; padding: 12px 14px; }
+    .dia .t { display: block; color: #fff; font-weight: 700; margin-bottom: 6px; }
+    .dia ul { margin: 0; padding-left: 18px; color: var(--suave); font-size: 14.5px; }
+    .dia li { margin: 3px 0; }
+    code {
+      background: #161b40;
+      border: 1px solid var(--borde);
+      border-radius: 5px;
+      padding: 1px 5px;
+      font-size: .9em;
+    }
+    ul.controles { list-style: none; margin: 0; padding: 0; }
+    ul.controles li { margin: 7px 0; color: var(--suave); font-size: 15px; }
+    kbd {
+      display: inline-block;
+      background: var(--sub);
+      border: 1px solid var(--borde);
+      border-bottom-width: 3px;
+      border-radius: 6px;
+      padding: 1px 8px;
+      font: 600 13px/1.5 system-ui, sans-serif;
+      color: var(--texto);
+      white-space: nowrap;
+    }
+    .aviso { color: var(--suave); font-size: 14px; margin: 12px 0 0; }
+    .aviso b { color: var(--acento); }
+
+    /* ---------- pie ---------- */
+    footer {
+      text-align: center;
+      color: var(--suave);
+      font-size: 13.5px;
+      margin-top: 26px;
+      line-height: 1.9;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tarjeta { transition: none; }
+      .tarjeta:hover { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="pagina">
+
+    <header class="cabecera">
+      <img class="deco bean"  src="./assets/sprites/bean.png" alt="" aria-hidden="true" />
+      <img class="deco spark" src="./assets/sprites/sparkles.png" alt="" aria-hidden="true" />
+      <img class="deco jefe"  src="./assets/sprites/gigagantrum.png" alt="" aria-hidden="true" />
+      <h1>TALLER KAPLAY</h1>
+      <p class="sub">
+        <b>Snow Bros en 4 horas:</b> aprende juegos 2D con KAPLAY construyendo un MVP el
+        Día 1 y subiéndolo de nivel el Día 2. Todo el material está aquí abajo —
+        <b>sin git, sin Node, solo navegador</b>.
+      </p>
+      <div class="insignias">
+        <span class="insignia"><b>2</b> sesiones × <b>2 h</b></span>
+        <span class="insignia">KAPLAY <b>v3001</b> por CDN</span>
+        <span class="insignia"><b>Sin instalar</b> nada</span>
+        <span class="insignia">Equipos con <b>VS Code + Live Server</b></span>
+      </div>
+    </header>
+
+    <h2 class="titulo-seccion">MATERIAL DEL TALLER</h2>
+
+    <section class="tarjetas" aria-label="Accesos al material del taller">
+      <a class="tarjeta destacada" href="./presentacion-dia2/">
+        <img class="icono" src="./assets/sprites/gigagantrum.png" alt="" />
+        <div>
+          <h3>Juego-presentación · Día 2 <span class="etiqueta">DÍA 2</span></h3>
+          <p>Hub + 6 salas con micro-demos en vivo (sprites, mundo, vida, partículas y
+             jefe) y zoom en cada solución.</p>
+          <span class="ir">Jugar →</span>
+        </div>
+      </a>
+
+      <a class="tarjeta" href="./presentacion/">
+        <img class="icono" src="./assets/sprites/door.png" alt="" />
+        <div>
+          <h3>Juego-presentación · Día 1 <span class="etiqueta">DÍA 1</span></h3>
+          <p>Hub + 5 salas de teoría con retos y micro-demos jugables. La parte que
+             se proyecta el primer día.</p>
+          <span class="ir">Jugar →</span>
+        </div>
+      </a>
+
+      <a class="tarjeta" href="./starter/">
+        <img class="icono" src="./assets/sprites/bean.png" alt="" />
+        <div>
+          <h3>Starter del equipo <span class="etiqueta">DÍA 1</span></h3>
+          <p>Plantilla con el escenario montado y 4 TODOs: es el juego que cada
+             equipo construye y conserva.</p>
+          <span class="ir">Abrir →</span>
+        </div>
+      </a>
+
+      <a class="tarjeta" href="./solucion-dia1/">
+        <img class="icono" src="./assets/sprites/heart.png" alt="" />
+        <div>
+          <h3>Solución Día 1 <span class="etiqueta">REFERENCIA</span></h3>
+          <p>El MVP completo (física, colisiones, marcador y victoria): plan B si un
+             equipo se queda atascado.</p>
+          <span class="ir">Abrir →</span>
+        </div>
+      </a>
+
+      <a class="tarjeta" href="./solucion-dia2-lite/">
+        <img class="icono" src="./assets/sprites/star.png" alt="" />
+        <div>
+          <h3>Kit Día 2 <span class="etiqueta">BLOQUES ▸ D2-n</span></h3>
+          <p>Kit de enseñanza: bloques reducidos para pegar en el starter mientras
+             el instructor va marcando el ritmo.</p>
+          <span class="ir">Abrir →</span>
+        </div>
+      </a>
+
+      <a class="tarjeta" href="./solucion-dia2/">
+        <img class="icono" src="./assets/sprites/sun.png" alt="" />
+        <div>
+          <h3>Solución completa Día 2 <span class="etiqueta">DEMO</span></h3>
+          <p>La referencia final con parallax, jefe, partículas y récord local: todo
+             etiquetado para ver qué pega y qué se escribe.</p>
+          <span class="ir">Abrir →</span>
+        </div>
+      </a>
+    </section>
+
+    <section class="seccion" aria-label="El taller en una línea">
+      <h2>EL TALLER EN UNA LÍNEA</h2>
+      <div class="dos">
+        <div class="dia">
+          <span class="t">Día 1 · 2 h — sesión en directo</span>
+          <ul>
+            <li><b>TODO 1</b> física: <code>dt()</code>, <code>body()</code>, <code>isGrounded()</code></li>
+            <li><b>TODO 2</b> tags y <code>onCollide</code>: patrulla, pisotón vs choque lateral</li>
+            <li><b>TODO 3</b> marcador con <code>text()</code> y META 1000</li>
+            <li><b>TODO 4</b> sonidos y victoria con <code>puntos &gt;= 1000</code></li>
+          </ul>
+        </div>
+        <div class="dia">
+          <span class="t">Día 2 · 2 h — guiado por bloques ▸ D2-n</span>
+          <ul>
+            <li>Sprites + <code>anchor("bot")</code> y colisión por base</li>
+            <li>Mundo de 2560 px con cámara y parallax</li>
+            <li><code>health()</code> + ítem curativo y jefe con proyectiles</li>
+            <li>Partículas, récord con <code>getData</code>/<code>setData</code> y showcase final</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="seccion" aria-label="Controles">
+      <h2>CONTROLES</h2>
+      <ul class="controles">
+        <li><kbd>A</kbd>/<kbd>D</kbd> o <kbd>←</kbd>/<kbd>→</kbd> mover ·
+            <kbd>ESPACIO</kbd> saltar · <kbd>R</kbd> reiniciar</li>
+        <li>En la presentación: <kbd>1</kbd>–<kbd>5</kbd> (Día 1) o
+            <kbd>1</kbd>–<kbd>6</kbd> (Día 2) va directo a cada sala ·
+            <kbd>S</kbd> abre/cierra la solución del bloque · <kbd>ESC</kbd> cierra
+            o vuelve al mapa</li>
+        <li>Los micro-demos se juegan con <kbd>ESPACIO</kbd>, <kbd>A</kbd> y
+            <kbd>D</kbd> dentro de cada sala</li>
+      </ul>
+      <p class="aviso"><b>Los juegos usan teclado:</b> mejor en ordenador
+         (el móvil no lleva teclas). La presentación está pensada para proyectar.</p>
+    </section>
+
+    <footer>
+      <div>
+        <a href="https://github.com/j2deme/Intro-Kaplay">github.com/j2deme/Intro-Kaplay</a>
+        · material del taller, libre de usar y modificar
+      </div>
+      <div>
+        KAPLAY: MIT · Sprites y sonidos: KAPLAY Crew y Kenney.nl (CC0-1.0)
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>
