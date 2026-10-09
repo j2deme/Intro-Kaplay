@@ -23,9 +23,14 @@ loadRoot("");
 loadFont("inter", "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf");
 loadFont("jetbrains", "https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPQ.ttf");
 loadRoot("../assets/");
-loadSprite("bean", "sprites/bean.png");
-loadSprite("door", "sprites/door.png");
-loadSound("select", "sounds/select.ogg");
+// Mismo patrón que enseña la sala 2: un bucle de loads. Lo usan las 6
+// micro-demos conceptuales del recuadro derecho.
+for (const nombre of ["bean", "door", "zombean", "grass", "heart", "sparkles", "gigagantrum"]) {
+    loadSprite(nombre, "sprites/" + nombre + ".png");
+}
+for (const nombre of ["select", "jump", "stomp", "hurt", "pickup", "heal", "projectile", "boss-hit", "victory", "gameover"]) {
+    loadSound(nombre, "sounds/" + nombre + ".ogg");
+}
 
 const FONT_TITULO = "happy";
 const FONT_CUERPO = "inter";
@@ -292,38 +297,55 @@ scene("sala", (idx) => {
         color(255, 255, 255),
     ]);
 
-    // La derecha, en vez de una demo propia, es la ficha de lo que el
-    // instructor demuestra EN VIVO desde el kit.
-    add([
-        rect(580, BH, { radius: 12 }),
-        pos(664, BY),
-        color("#0c0f26"),
-        outline(2, rgb(PALETA.acento)),
-    ]);
-    add([
-        text("DEMO EN VIVO · " + s.demoTitulo, { size: 17, font: FONT_CUERPO }),
-        pos(680, BY + 12),
-        color(PALETA.acento),
-    ]);
-    add([
-        text(s.pasos.map((p, i) => (i + 1) + ". " + p).join("\n"), {
-            size: 19,
-            width: 548,
-            font: FONT_CUERPO,
-            lineSpacing: 8,
-        }),
-        pos(680, BY + 44),
-        color(PALETA.cuerpo),
-    ]);
-    add([
-        text("Fuente: ../solucion-dia2-lite/main.js  ·  busca la etiqueta ▸", {
-            size: 16,
-            width: 548,
-            font: FONT_CODIGO,
-        }),
-        pos(680, BY + BH - 34),
-        color("#8a93c4"),
-    ]);
+    // La derecha: la micro-demo conceptual — el MISMO patrón que verán en
+    // el kit, jugable aquí, con su leyenda de teclas arriba. El snippet de
+    // la izquierda es el código que produce ese efecto. (Mientras una sala
+    // no tenga demo, se muestra su ficha de pasos del kit.)
+    if (s.demo) {
+        add([
+            rect(580, BH, { radius: 12 }),
+            pos(664, BY),
+            color("#0c0f26"),
+            outline(2, rgb(PALETA.acento)),
+        ]);
+        add([
+            text("DEMO · " + s.controles, { size: 17, font: FONT_CUERPO }),
+            pos(680, BY + 12),
+            color(PALETA.acento),
+        ]);
+        s.demo({ x: 666, y: BY + 36, w: 576, h: BH - 38 });
+    } else {
+        add([
+            rect(580, BH, { radius: 12 }),
+            pos(664, BY),
+            color("#0c0f26"),
+            outline(2, rgb(PALETA.acento)),
+        ]);
+        add([
+            text("DEMO EN VIVO · " + s.demoTitulo, { size: 17, font: FONT_CUERPO }),
+            pos(680, BY + 12),
+            color(PALETA.acento),
+        ]);
+        add([
+            text(s.pasos.map((p, i) => (i + 1) + ". " + p).join("\n"), {
+                size: 19,
+                width: 548,
+                font: FONT_CUERPO,
+                lineSpacing: 8,
+            }),
+            pos(680, BY + 44),
+            color(PALETA.cuerpo),
+        ]);
+        add([
+            text("Fuente: ../solucion-dia2-lite/main.js  ·  etiqueta ▸", {
+                size: 16,
+                width: 548,
+                font: FONT_CODIGO,
+            }),
+            pos(680, BY + BH - 34),
+            color("#8a93c4"),
+        ]);
+    }
 
     // pie
     add([

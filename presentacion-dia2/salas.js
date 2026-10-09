@@ -20,6 +20,12 @@ export const PALETA = {
     bien: "#7cff6b",
 };
 
+// Nombres de fuente registrados por main.js con loadFont(): los puede usar
+// aquí cualquier demo (son globales en KAPLAY, no hace falta importarlos).
+const F_TITULO = "happy";
+const F_CUERPO = "inter";
+const F_COD = "jetbrains";
+
 export const SALAS = [
     // -------------------------------------------------------------- 1
     {
@@ -73,13 +79,176 @@ onCollide("jugador", "enemigo", (j, e) => {
 onKeyPress("space", () => {
   if (jugador.isGrounded()) { jugador.jump(); play("jump"); }
 });`,
-        demoTitulo: "el recap en tu archivo",
-        pasos: [
-            "Abre tu main.js (el del Día 1).",
-            "Descomenta refrescarHud y su llamada en sumar().",
-            "Pega el onCollide de choque lateral tras crearEnemigo.",
-            "Juega: el +100 se ve al instante; chocar de lado mata.",
-        ],
+        // Micro-demo conceptual: el recap del Día 1 — HUD que se refresca,
+        // pisotón geométrico y choque lateral mortal, con el rect de ayer.
+        controles: "A/D: mover · ESPACIO: saltar · R: reiniciar",
+        demo(box) {
+            const { x, y, w, h } = box;
+            setGravity(2400);
+            const sueloY = y + h - 44;
+            let puntos = 0;
+            let jugando = true;
+            let metaOk = false;
+
+            // suelo (isStatic: el jugador lo pisa)
+            add([
+                rect(w, 44), pos(x, sueloY), color("#2b3370"),
+                area(), body({ isStatic: true }),
+            ]);
+
+            // HUD al estilo refrescarHud(): el texto se refresca al sumar
+            const hud = add([
+                text("PUNTOS: 0   META: 300", { size: 16, font: F_COD }),
+                pos(x + 14, y + 10),
+                color(PALETA.titulo),
+            ]);
+            const avisoMeta = add([
+                text("¡META! ✓", { size: 22, font: F_TITULO }),
+                pos(x + w - 14, y + 8),
+                anchor("right"),
+                color(PALETA.bien),
+                opacity(0),
+            ]);
+            add([
+                text("Pisa al enemigo: +100  ·  De lado: GAME OVER", {
+                    size: 15, font: F_CUERPO,
+                }),
+                pos(x + 14, y + 40),
+                color("#8a93c4"),
+            ]);
+            function refrescarHud() {
+                hud.text = "PUNTOS: " + puntos + "   META: 300";
+                if (puntos >= 300 && !metaOk) {
+                    metaOk = true;
+                    avisoMeta.opacity = 1;
+                    play("pickup");
+                }
+            }
+            function flotar(txt, px, py) {
+                const t = add([
+                    text(txt, { size: 18, font: F_TITULO }),
+                    pos(px, py), anchor("center"),
+                    color(PALETA.bien), opacity(1),
+                    lifespan(0.8, { fade: 0.4 }),
+                ]);
+                t.onUpdate(() => { t.pos.y -= 70 * dt(); });
+            }
+
+            // EL JUGADOR — el rect del Día 1, intacto
+            const jugador = add([
+                rect(48, 60), pos(x + 70, y + 40),
+                color(PALETA.acento), area(),
+                // salto contenido: en el pico queda por debajo del HUD,
+                // así la franja del marcador solo cambia al puntuar
+                body({ jumpForce: 750 }),
+                "jugador-demo",
+            ]);
+
+            // MISMO guard que en tu archivo: ¿lo está pisando?
+            function pisandolo(j, e) {
+                return j.vel.y >= 0 && j.pos.y + j.height < e.pos.y + e.height / 2;
+            }
+            function crearEnemigo(px) {
+                const e = add([
+                    rect(48, 60), pos(px, sueloY - 60),
+                    color(PALETA.enemigo), area(),
+                    body({ isStatic: true }),
+                    { dir: px < x + w / 2 ? 1 : -1, velocidad: 90 },
+                    "enemigo-demo",
+                ]);
+                e.onUpdate(() => {
+                    // patrulla
+                    e.pos.x += e.dir * e.velocidad * dt();
+                    if (e.pos.x <= x + 8 || e.pos.x >= x + w - 56) {
+                        e.dir *= -1;
+                        e.pos.x = clamp(e.pos.x, x + 8, x + w - 56);
+                    }
+                    if (!jugando || !jugador.exists()) return;
+                    // pisotón geométrico: onCollide no ve el aterrizaje
+                    const pies = jugador.pos.y + jugador.height;
+                    if (
+                        jugador.vel.y >= 0 &&
+                        jugador.pos.x < e.pos.x + e.width &&
+                        jugador.pos.x + jugador.width > e.pos.x &&
+                        pies > e.pos.y - 6 &&
+                        pies < e.pos.y + e.height / 2
+                    ) {
+                        pisar(e);
+                    }
+                });
+                return e;
+            }
+            function pisar(e) {
+                const px = e.pos.x, py = e.pos.y;
+                const lejos = e.pos.x < x + w / 2;
+                e.destroy();
+                puntos += 100;
+                refrescarHud();
+                flotar("+100", px + 24, py - 6);
+                play("stomp");
+                jugador.jump(700); // rebote corto al pisar
+                wait(2, () => {
+                    if (jugando && get("enemigo-demo").length === 0) {
+                        crearEnemigo(lejos ? x + w - 60 : x + 12);
+                    }
+                });
+            }
+            crearEnemigo(x + w - 110);
+
+            // choque lateral → GAME OVER. El feedback es DENTRO del recuadro
+            // (ni shake ni flash: sacudirían toda la presentación).
+            const marca = add([rect(w, h), pos(x, y), color("#ff2d55"), opacity(0)]);
+            const finCaja = add([
+                rect(320, 96, { radius: 12 }),
+                pos(x + w / 2, y + h / 2), anchor("center"),
+                color("#1c0a14"), outline(3, rgb("#ff2d55")),
+                opacity(0),
+            ]);
+            const finTxt = add([
+                text("GAME OVER\nR: reiniciar", {
+                    size: 24, align: "center", width: 300,
+                    font: F_TITULO, lineSpacing: 8,
+                }),
+                pos(x + w / 2, y + h / 2), anchor("center"),
+                color("#ff5c8a"), opacity(0),
+            ]);
+            onCollide("jugador-demo", "enemigo-demo", (j, e) => {
+                if (!e.exists() || !jugando) return;
+                if (pisandolo(j, e)) return; // el pisotón lo resuelve
+                jugando = false;
+                play("hurt");
+                marca.opacity = 0.7;
+                tween(0.7, 0, 0.45, (v) => (marca.opacity = v));
+                finCaja.opacity = 1;
+                finTxt.opacity = 1;
+            });
+
+            // controles + red de seguridad, como en tu archivo
+            onKeyDown("a", () => { if (jugando) jugador.pos.x -= 260 * dt(); });
+            onKeyDown("d", () => { if (jugando) jugador.pos.x += 260 * dt(); });
+            onKeyPress("space", () => {
+                if (jugando && jugador.isGrounded()) { jugador.jump(); play("jump"); }
+            });
+            jugador.onUpdate(() => {
+                jugador.pos.x = clamp(jugador.pos.x, x, x + w - jugador.width);
+                if (jugador.pos.y > y + h) jugador.pos = vec2(x + 70, y + 40);
+            });
+
+            onKeyPress("r", () => {
+                puntos = 0;
+                jugando = true;
+                metaOk = false;
+                refrescarHud();
+                avisoMeta.opacity = 0;
+                marca.opacity = 0;
+                finCaja.opacity = 0;
+                finTxt.opacity = 0;
+                jugador.pos = vec2(x + 70, y + 40);
+                jugador.vel.x = 0;
+                jugador.vel.y = 0;
+                if (get("enemigo-demo").length === 0) crearEnemigo(x + w - 110);
+            });
+        },
     },
     // -------------------------------------------------------------- 2
     {
