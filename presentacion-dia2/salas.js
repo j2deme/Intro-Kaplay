@@ -969,12 +969,207 @@ function golpeAlJefe() {
     jefe.destroy(); estallar(px, py, 50, ["#ffd166"]);
     wait(0.9, () => go("victoria", puntos, guardaRecord(puntos))); }
 }`,
-        demoTitulo: "jefe y showcase",
-        pasos: [
-            "Avanzados: pega ▸ D2-5 en su archivo (requiere D2-3 y D2-4).",
-            "Todos: en el kit, camina hasta el fondo del nivel.",
-            "Barra de vida, proyectiles y golpe con enfriamiento.",
-            "SHOWCASE: 45 s por equipo y récord final en pantalla.",
-        ],
+        // Micro-demo conceptual: el jefe — barra de vida, proyectiles que
+        // hay que esquivar y pisotón geométrico con enfriamiento (kit ▸ D2-5).
+        controles: "A/D: mover · ESPACIO: saltar · R: reiniciar",
+        demo(box) {
+            const { x, y, w, h } = box;
+            setGravity(2400);
+            const sueloY = y + h - 44;
+            const VIDA_MAX = 6;
+            let jugando = true;
+            let derrotado = false;
+            let enfriamiento = 0;
+            let impactos = 0;
+            let loopDisp = null;
+
+            add([
+                rect(w, 44), pos(x, sueloY), color("#2b3370"),
+                area(), body({ isStatic: true }),
+            ]);
+
+            // barra de vida del jefe (arriba, como fixed() en el kit)
+            add([text("JEFE", { size: 16, font: F_COD }), pos(x + 14, y + 11), color(PALETA.titulo)]);
+            add([rect(200, 16, { radius: 4 }), pos(x + 70, y + 10), color("#3a1420"), outline(2, rgb("#ffd166"))]);
+            const barra = add([rect(196, 12, { radius: 3 }), pos(x + 72, y + 12), color("#ff2d55")]);
+            const impactosTxt = add([
+                text("IMPACTOS: 0", { size: 15, font: F_CUERPO }),
+                pos(x + w - 14, y + 11),
+                anchor("right"),
+                color(PALETA.acento),
+            ]);
+            function actualizarBarra() {
+                const v = jefe && jefe.exists() ? jefe.hp() : 0;
+                barra.width = 196 * Math.max(0, v / VIDA_MAX);
+            }
+
+            const jugador = add([
+                sprite("bean"),
+                pos(x + 50, y + 40),
+                area(), body({ jumpForce: 750 }),
+                "jugador-demo",
+            ]);
+
+            // MISMO guard que en tu archivo: ¿lo está pisando?
+            function pisandolo(j, e) {
+                return j.vel.y >= 0 && j.pos.y + j.height < e.pos.y + e.height / 2;
+            }
+
+            let jefe = null;
+            function crearJefe() {
+                jefe = add([
+                    sprite("gigagantrum"),
+                    pos(x + w - 240, sueloY - 120),
+                    area(), body({ isStatic: true }),
+                    health(6, 6),
+                    { dir: -1, velocidad: 70, desde: x + w - 300, hasta: x + w - 130 },
+                    "jefe-demo",
+                ]);
+                jefe.onUpdate(() => {
+                    // patrulla
+                    jefe.pos.x += jefe.dir * jefe.velocidad * dt();
+                    if (jefe.pos.x <= jefe.desde || jefe.pos.x >= jefe.hasta) {
+                        jefe.dir *= -1;
+                        jefe.pos.x = clamp(jefe.pos.x, jefe.desde, jefe.hasta);
+                    }
+                    if (!jugando || !jugador.exists()) return;
+                    // pisotón geométrico CON enfriamiento: un golpe por rebote
+                    const pies = jugador.pos.y + jugador.height;
+                    if (
+                        enfriamiento <= 0 &&
+                        jugador.vel.y >= 0 &&
+                        jugador.pos.x < jefe.pos.x + jefe.width &&
+                        jugador.pos.x + jugador.width > jefe.pos.x &&
+                        pies > jefe.pos.y - 6 &&
+                        pies < jefe.pos.y + jefe.height / 2
+                    ) {
+                        golpeAlJefe();
+                    }
+                    enfriamiento = Math.max(0, enfriamiento - dt());
+                });
+                return jefe;
+            }
+            function golpeAlJefe() {
+                if (!jugando || derrotado) return;
+                enfriamiento = 0.35;
+                jefe.hurt(1);
+                play("bosshit");
+                jugador.jump(700); // te rebota igual que un enemigo
+                actualizarBarra();
+                if (jefe.hp() <= 0) {
+                    derrotado = true;
+                    jugando = false;
+                    const px = jefe.pos.x + 60, py = jefe.pos.y + 60;
+                    jefe.destroy();
+                    get("proyectil").forEach((p) => p.destroy());
+                    if (loopDisp) { loopDisp.cancel(); loopDisp = null; }
+                    play("victory");
+                    flotar("¡VICTORIA!", px, py - 20);
+                    victCaja.opacity = 1;
+                    victTxt.opacity = 1;
+                }
+            }
+            crearJefe();
+
+            // Feedback DENTRO de la caja (ni shake ni flash globales)
+            const marca = add([rect(w, h), pos(x, y), color("#ff2d55"), opacity(0)]);
+            const victCaja = add([
+                rect(340, 96, { radius: 12 }),
+                pos(x + w / 2, y + h / 2), anchor("center"),
+                color("#0d2a16"), outline(3, rgb("#7cff6b")),
+                opacity(0),
+            ]);
+            const victTxt = add([
+                text("¡VICTORIA!\nR: reiniciar", {
+                    size: 24, align: "center", width: 320,
+                    font: F_TITULO, lineSpacing: 8,
+                }),
+                pos(x + w / 2, y + h / 2), anchor("center"),
+                color("#7cff6b"), opacity(0),
+            ]);
+            function flotar(txt, px, py) {
+                const t = add([
+                    text(txt, { size: 20, font: F_TITULO }),
+                    pos(px, py), anchor("center"),
+                    color(PALETA.bien), opacity(1),
+                    lifespan(1, { fade: 0.4 }),
+                ]);
+                t.onUpdate(() => { t.pos.y -= 60 * dt(); });
+            }
+
+            // Proyectil: sale del jefe hacia donde estás y NO sale de la caja
+            function dispararProyectil() {
+                if (!jugando || derrotado || !jefe.exists()) return;
+                const dir = jugador.pos.x < jefe.pos.x ? -1 : 1;
+                const p = add([
+                    rect(24, 14, { radius: 6 }),
+                    pos(jefe.pos.x + dir * 60, jefe.pos.y + 70),
+                    anchor("center"),
+                    color("#ffb347"),
+                    area(),
+                    move(vec2(dir, 0), 400),
+                    rotate(dir < 0 ? 180 : 0),
+                    opacity(1),
+                    lifespan(3, { fade: 0.5 }),
+                    "proyectil",
+                ]);
+                p.onUpdate(() => {
+                    if (p.pos.x < x - 12 || p.pos.x > x + w + 12) p.destroy();
+                });
+                play("projectile");
+            }
+            loopDisp = loop(1.5, dispararProyectil);
+
+            function impacto(origenX) {
+                impactos++;
+                impactosTxt.text = "IMPACTOS: " + impactos;
+                jugador.pos.x += jugador.pos.x < origenX ? -70 : 70; // empujón
+                play("hurt");
+                marca.opacity = 0.5;
+                tween(0.5, 0, 0.35, (v) => (marca.opacity = v));
+            }
+            onCollide("jugador-demo", "proyectil", (j, p) => {
+                if (!p.exists() || !jugando) return;
+                const px = p.pos.x;
+                p.destroy();
+                impacto(px);
+            });
+            // el jefe de lado también duele; el pisotón lo resuelve arriba
+            onCollide("jugador-demo", "jefe-demo", (j, b) => {
+                if (!jugando || derrotado || enfriamiento > 0) return;
+                if (pisandolo(j, b)) return;
+                impacto(b.pos.x);
+            });
+
+            // controles + red de seguridad, como en tu archivo
+            onKeyDown("a", () => { if (jugando) jugador.pos.x -= 260 * dt(); });
+            onKeyDown("d", () => { if (jugando) jugador.pos.x += 260 * dt(); });
+            onKeyPress("space", () => {
+                if (jugando && jugador.isGrounded()) { jugador.jump(); play("jump"); }
+            });
+            jugador.onUpdate(() => {
+                jugador.pos.x = clamp(jugador.pos.x, x, x + w - jugador.width);
+                if (jugador.pos.y > y + h) jugador.pos = vec2(x + 50, y + 40);
+            });
+
+            onKeyPress("r", () => {
+                jugando = true;
+                derrotado = false;
+                enfriamiento = 0;
+                impactos = 0;
+                impactosTxt.text = "IMPACTOS: 0";
+                victCaja.opacity = 0;
+                victTxt.opacity = 0;
+                marca.opacity = 0;
+                jugador.pos = vec2(x + 50, y + 40);
+                jugador.vel.x = 0;
+                jugador.vel.y = 0;
+                get("proyectil").forEach((p) => p.destroy());
+                if (!jefe || !jefe.exists()) crearJefe();
+                jefe.heal(VIDA_MAX);
+                actualizarBarra();
+                if (!loopDisp) loopDisp = loop(1.5, dispararProyectil);
+            });
+        },
     },
 ];
