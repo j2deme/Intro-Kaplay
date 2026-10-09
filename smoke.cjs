@@ -14,6 +14,8 @@ const TODAS = [
     { url: "/starter/index.html", nombre: "starter", teclas: [] },
     { url: "/solucion-dia1/index.html", nombre: "solucion-dia1", teclas: ["Space", "ArrowRight"] },
     { url: "/solucion-dia2/index.html", nombre: "solucion-dia2", teclas: ["Space", "ArrowRight", "KeyA", "KeyD"] },
+    { url: "/solucion-dia2-lite/index.html", nombre: "solucion-dia2-lite", teclas: ["Space", "ArrowRight", "KeyA", "KeyD"] },
+    { url: "/presentacion-dia2/index.html", nombre: "presentacion-dia2", teclas: ["1", "s", "s", "3", "4", "5", "6"] },
 ];
 
 // Filtra por nombre si se pasa como argumento: `node smoke.cjs http://... presentacion`

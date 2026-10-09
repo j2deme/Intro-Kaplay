@@ -6,13 +6,15 @@
 
 **Material:**
 
-| Qué                | Carpeta          | Uso                                                   |
-| ------------------ | ---------------- | ----------------------------------------------------- |
-| Juego-presentación | `presentacion/`  | Se **proyecta** en el Día 1 (hub + 5 salas)           |
-| Starter            | `starter/`       | Cada equipo lo edita el Día 1; es su partida el Día 2 |
-| Solución Día 1     | `solucion-dia1/` | Referencia y "plan B" al final del Día 1              |
-| Solución Día 2     | `solucion-dia2/` | Kit de bloques del Día 2 (etiquetas `▸ D2-n`)         |
-| Assets             | `assets/`        | Sprites/sonidos/fuente ya descargados (CC0)           |
+| Qué                | Carpeta             | Uso                                                          |
+| ------------------ | ------------------- | ------------------------------------------------------------ |
+| Juego-presentación | `presentacion/`     | Se **proyecta** en el Día 1 (hub + 5 salas)                  |
+| Presentación Día 2 | `presentacion-dia2/`| Se **proyecta** en el Día 2 (hub + 6 salas, demo en vivo)    |
+| Starter            | `starter/`          | Cada equipo lo edita el Día 1; es su partida el Día 2        |
+| Solución Día 1     | `solucion-dia1/`    | Referencia y "plan B" al final del Día 1                     |
+| Kit Día 2          | `solucion-dia2-lite/`| **Kit de enseñanza** del Día 2: bloques `▸ D2-n` reducidos  |
+| Solución Día 2     | `solucion-dia2/`    | Solución completa (parallax y jefe) para las **demos**       |
+| Assets             | `assets/`           | Sprites/sonidos/fuente ya descargados (CC0)                  |
 
 ---
 
@@ -44,7 +46,7 @@ aunque falte algo, y lo que sobre se pega:
 - [ ] Repositorio copiado en los equipos (USB, carpeta compartida o git clone).
 - [ ] Internet disponible: KAPLAY se carga desde **unpkg CDN** la primera vez (los assets ya están locales).
 - [ ] Abrir `presentacion/index.html` con Live Server y comprobar sonido.
-- [ ] Tener abiertas en pestañas: `starter/`, `solucion-dia1/`, `solucion-dia2/`.
+- [ ] Tener abiertas en pestañas: `starter/`, `solucion-dia1/`, `solucion-dia2-lite/`, `solucion-dia2/` y, el Día 2, `presentacion-dia2/`.
 - [ ] Repartir/indicar: cada equipo abre **su** `starter/index.html` con Live Server (click derecho → _Open with Live Server_).
 
 ---
@@ -115,123 +117,137 @@ aunque falte algo, y lo que sobre se pega:
 - **Hablar (~4 min):** el sonido es _feedback_: uno bien puesto vale 10 de diseño; las escenas finales ya existen, solo hay que llamarlas con `go(...)`.
 - **Ellos (~12 min): TODO 4** — `play("jump")` al saltar, `play("stomp")` al pisar, `play("hurt")` al chocar; **`puntos >= 1000`** → `play("victory")` + `go("victoria", puntos)` (10 pisotones); choque lateral → `play("hurt")`, `shake(12)`, `go("gameover", puntos)`. (`R` ya está hecho.)
 - **Checkpoint final (01:55):** juego completo — se mueve, pisa (y reaparecen), choca, puntúa hacia 1000, suena, gana, pierde y reinicia.
-- **Cierre (~5 min):** abrir `solucion-dia1/` al lado y comparar; **preview de mañana**: abrir `solucion-dia2/` y pasear 30 s por el final (sprites, cámara, jefe) — "esto es vuestro código mañana".
+- **Cierre (~5 min):** abrir `solucion-dia1/` al lado y comparar; **preview de mañana**: abrir `solucion-dia2-lite/` y pasear 30 s ("esto es vuestro código mañana: sprites, mundo, vida y chispas") y, si sobra un minuto, un flash de `solucion-dia2/` (parallax y jefe) como "techo posible".
   > **Valvula:** si alguien se lo ha dejado a medias, mañana copia `solucion-dia1/main.js` por el suyo. Sin culpa: es el punto de partida de todos.
 
 ---
 
 # DÍA 2 — 2 h · guiado por equipos
 
-**Archivo de trabajo:** `solucion-dia2/main.js` es el **kit de bloques**: cada sección
-está marcada con su etiqueta `▸ D2-n` (bloque y franja horaria) y con **PEGAR** o
-**escribir**. El mapa completo está en la cabecera del archivo.
+**Se proyecta** `presentacion-dia2/index.html` (6 salas: teoría, snippet y la
+ficha de DEMO EN VIVO; la tecla **`S`** abre la solución del bloque).
 
-| Franja      | Bloque                            | Modo                     |
-| ----------- | --------------------------------- | ------------------------ |
-| 00:00–00:15 | Dudas + puesta a punto            | —                        |
-| 00:15–00:40 | **D2-1** Sprites y sonido         | escribir                 |
-| 00:40–00:55 | **D2-2** Mundo, cámara y parallax | pegar                    |
-| 00:55–01:15 | **D2-3** Vida, daño e ítems       | escribir + pegar `danar` |
-| 01:15–01:35 | **D2-4** Jefe y proyectiles       | pegar                    |
-| 01:35–01:50 | **D2-5** Partículas y récord      | pegar                    |
-| 01:50–02:00 | **D2-6** Showcase                 | —                        |
+**Archivo de trabajo:** `solucion-dia2-lite/main.js` es el **kit de bloques** (una
+partida completa y jugable): cada sección está marcada con su etiqueta `▸ D2-n`
+(bloque y franja) y con **PEGAR** o **escribir**. Los equipos pegan en **su**
+archivo del Día 1. `solucion-dia2/main.js` (solución completa, con parallax y
+jefe entero) se usa solo para las **demos** del instructor.
 
-### 00:00–00:15 · Dudas + puesta a punto
+**Alcance reducido:** cuatro bloques que se ven y se sienten (sprites, mundo,
+vida, partículas) + el jefe como **opcional** para equipos avanzados. Parallax y
+jefe completo = demo, no tarea.
+
+| Franja      | Bloque                           | Modo                     |
+| ----------- | -------------------------------- | ------------------------ |
+| 00:00–00:15 | Cierre Día 1 + dudas             | escribir                 |
+| 00:15–00:40 | **D2-1** Sprites                 | escribir                 |
+| 00:40–01:00 | **D2-2** Mundo y cámara          | pegar                    |
+| 01:00–01:25 | **D2-3** Vida y daño             | escribir + pegar `danar` |
+| 01:25–01:40 | **D2-4** Partículas y récord     | pegar                    |
+| 01:40–01:50 | **D2-5** Jefe ⭐ (opcional)      | pegar                    |
+| 01:50–02:00 | **D2-6** Showcase                | —                        |
+
+### 00:00–00:15 · Cierre del Día 1 + dudas
 
 - Preguntar: **¿a cuántos les arranca el código de ayer?** Los que no, copian
   `solucion-dia1/main.js` encima de su `starter/main.js` (o trabajan desde esa carpeta).
+- **Cerrar los dos huecos de ayer en cada equipo** (sala 1 de la presentación):
+  `refrescarHud()` descomentado y llamado en `sumar()`, y el `onCollide` de choque
+  lateral tras `crearEnemigo`. **Es el prerrequisito de D2-3**: ese mismo
+  `onCollide` es el que pasará a llamar a `danar()`.
 - Ver los assets (`assets/sprites`): bean, zombean, gigagantrum, heart, grass — todo CC0, ya en el repo.
-- Enseñar el mapa: `solucion-dia2/main.js` + etiquetas `▸ D2-n`.
+- Enseñar el mapa: `presentacion-dia2/` + etiquetas `▸ D2-n` del kit.
 
-### 00:15–00:40 · D2-1 · Sprites y sonido (25 min) — **escribir**
+### 00:15–00:40 · D2-1 · Sprites (25 min) — **escribir**
 
-- **Cargar** (copiar la lista de `▸ D2-1` en la cabecera): `loadSprite` de
-  bean, zombean, gigagantrum, heart, grass, moon, cloud, star, sparkles y los
-  `loadSound` que falten (`land`, `heal`, `projectile`, `bosshit`, `voz`, `burp`).
-- **Sustituir:** `rect(48, 60)` → `sprite("bean", { width: 78, height: 68 })` y
-  `rect(44, 44)` → `sprite("zombean", { width: 72, height: 63 })`, ambos con
-  **`anchor("bot")`**: la `y` pasa a ser los pies → el squash/stretch no mueve los pies.
-- **Colisiones:** la fórmula del Día 1 la sustituye la API:
-  `onCollide("jugador", "enemigo", (j, e, col) => { if (col.isBottom()) { pisotón } else { daño } })`.
-- **Coordenadas de patrulla** (con `anchor("bot")` el parámetro es el pie):
+- **Cargar** (copiar la lista de `▸ D2-1` del kit): `loadSprite` de
+  bean, zombean, grass, heart y sparkles.
+- **Sustituir:** `rect(48, 60)` + `color(...)` → `sprite("bean")` y
+  `rect(44, 44)` + `color(...)` → `sprite("zombean")`. **Se mantiene el ancla
+  por esquina superior**: nada de `anchor("bot")` — así la fórmula del pisotón
+  del Día 1 sigue intacta y `area()` se redibuja solo.
+- **Coordenadas** (el sprite mide 61×53 → `y = borde de la superficie − 53`):
   ```js
-  crearEnemigo(380, SUELO_Y, 330, 560);
-  crearEnemigo(860, SUELO_Y, 760, 1080);
-  crearEnemigo(340, 530, 245, 435);
-  crearEnemigo(1210, 530, 1105, 1315);
+  crearEnemigo(140, 607, 60, 460);      // suelo (660 − 53)
+  crearEnemigo(860, 607, 720, 1220);
+  crearEnemigo(200, 472, 130, 360);     // plat. 1 (525 − 53)
+  crearEnemigo(1000, 492, 930, 1120);   // plat. 3 (545 − 53)
   ```
-- **Checkpoint (00:40):** mismo juego de ayer, pero con sprites; los pisotones siguen funcionando y suena el salto.
+- **Sonido del salto:** `play("jump")` dentro de `onKeyPress("space")` con
+  `isGrounded()` (el detalle pendiente del TODO 4).
+- **Checkpoint (00:40):** mismo juego de ayer con cara; los pisotones siguen
+  funcionando y suena el salto.
 - **Escalera:** sonido de aterrizaje (`land`) al tocar el suelo.
-- **Si vamos tarde:** pegar `crearEnemigo` entero y el bloque del jugador (`▸ D2-1`).
+- **Si vamos tarde:** pegar los loads + el `add()` del jugador y las 4 llamadas.
 
-### 00:40–00:55 · D2-2 · Mundo, cámara y parallax (15 min) — **pegar**
+### 00:40–01:00 · D2-2 · Mundo y cámara (20 min) — **pegar**
 
-- **PEGAR** los bloques `▸ D2-2`: constantes (`ANCHO_MUNDO`, `SUELO_Y`,
-  `PLATAFORMAS`), el cielo, la función `capa()`, las 4 capas de fondo
-  (estrellas, luna, colinas, nubes), el suelo con `techoDeHierba()` y el callback
-  de cámara.
+- **PEGAR** los bloques `▸ D2-2`: `ANCHO_MUNDO`, el suelo ancho, `techoDeHierba()`
+  y el callback de cámara.
 - **Explicar (~5 min), solo 3 ideas:**
-  1. `factor`: 0 = capa fija en pantalla, 1 = se mueve con el mundo.
-     La fórmula es `base + (1 - factor) × (cámara − 640)` (luna 0.05 casi quieta, colinas 0.55, mundo 1).
-  2. **Orden**: la cámara se registra _antes_ que las capas — `update()` recorre
-     los objetos en orden de inserción; si no, las capas leen la cámara del frame anterior.
-  3. `setCamPos(clamp(x, 640, ANCHO_MUNDO − 640), 360)`: la cámara sigue al jugador sin enseñar fuera del nivel.
-- **Checkpoint (00:55):** el nivel mide 2560 px, la cámara sigue y las capas van a distintas velocidades.
-- **Si vamos tarde:** es el bloque más mecánico del día; **pegar sin más** y explicarlo mientras.
+  1. **Mozaicar en vez de estirar:** `grass` es un bloque de 64×64; estirarlo a
+     2560 px deja escalones gigantes en la línea ondulada.
+  2. `setCamPos(clamp(x, 640, ANCHO_MUNDO − 640), 360)`: el jugador queda anclado
+     al centro y la cámara no se sale del nivel.
+  3. El HUD lleva `fixed()`: viaja con la pantalla, no con la cámara.
+- **Checkpoint (01:00):** el nivel mide 2560 px y se recorre entero de punta a
+  punta sin que la cámara se asome a los bordes.
+- **Parallax → DEMO:** enseñarlo desde `solucion-dia2/` (30 s: "así quedaría con
+  capas de fondo"), **no se implementa**.
+- **Si vamos tarde:** es el bloque más mecánico; **pegar sin más** y explicarlo mientras.
 
-### 00:55–01:15 · D2-3 · Vida, daño e ítems (20 min)
+### 01:00–01:25 · D2-3 · Vida y daño (25 min)
 
 - **Escribir:** `health(3, 3)` en el jugador + HUD de 3 corazones (`sprite("heart")`
-  con `opacity` según `jugador.hp()`) + llamar a `actualizarHud()`.
+  `fixed()` bajo el marcador) + ampliar `refrescarHud()` para apagarlos (opacidad 0.22).
 - **PEGAR y explicar `danar(cantidad, origenX)`** (`▸ D2-3`): resta vida, empuja
-  (knockback), **1 s de invulnerabilidad** con parpadeo, `shake`/`flash` y muerte → game over.
-  _Nota:_ el daño lateral hace 1 corazón; **el proyectil y el jefe no matan de un golpe**.
+  (knockback), **1 s de invulnerabilidad** con parpadeo, `shake`/`flash` y, con la
+  última vida, game over. El `onCollide` del cierre de hoy **no mata: llama a `danar`**.
 - **Escribir el ítem corazón** (`▸ D2-3`): `sprite("heart")` + `area()` + tag
-  `"item-vida"`, va y viene con `sin(fase)`, y al chocar `jugador.heal(1)` +
-  `play("heal")` y se retira el objeto.
-- **Checkpoint (01:15):** 3 corazones en pantalla, el choque lateral quita uno con
-  parpadeo, el corazón cura y desaparece.
+  `"item-vida"`, flota con `sin(fase)` y al chocar `jugador.heal(1)` +
+  `play("heal")` y se retira.
+- **Checkpoint (01:25):** 3 corazones en pantalla, el choque lateral quita uno con
+  parpadeo (no mata de un golpe) y el corazón cura.
 - **Escalera:** corazón que hace _bob_ más rápido con el jefe cerca.
+- **Si vamos tarde:** pegar corazones + `danar` enteros.
 
-### 01:15–01:35 · D2-4 · Jefe y proyectiles (20 min) — **pegar**
+### 01:25–01:40 · D2-4 · Partículas y récord (15 min) — **pegar**
 
-- **PEGAR** `▸ D2-4`: creación del jefe (`sprite("gigagantrum")` + `health(6, 6)` +
-  patrón lateral), la barra "JEFE", `dispararProyectil()` + `loop(1.5, ...)`,
-  la colisión con el jugador y el pisotón → `jefe.hurt(1)` con rebote.
-- **Explicar (~5 min):**
-  - `loop(1.5, dispararProyectil)` y la condición `jugador.pos.x > 1750`: el jefe
-    no dispara a distancia — **el jugador debe acercarse**.
-  - El proyectil se lanza a `jefe.pos.y − 45`: a la altura del cuerpo del jugador
-    (con −96 pasaba por encima de su cabeza).
-  - La barra: `width = 320 × hp / max` (fondo `#4a2440` para lo que falta).
-- **Checkpoint (01:35):** la barra aparece al acercarse, los proyectiles llegan,
-  **6 pisotones** y sale la victoria.
-- **Escalera:** proyectil en abanico o grito del jefe al recibir daño.
-
-### 01:35–01:50 · D2-5 · Partículas y récord (15 min) — **pegar**
-
-- **PEGAR `estallar()`** y llamarla en el pisotón y en la muerte del jefe
-  (`particles()` + `lifespan()`: **`lifespan` exige `opacity()`** o no se desvanecen).
+- **PEGAR `estallar()`** y llamarla en `pisar()` y en `sumar()`
+  (`particles()` + textura `sparkles`; **`lifespan` exige `opacity()`** o no se desvanecen).
 - **PEGAR `guardaRecord` / `leerRecord`** con `getData`/`setData` (KAPLAY envuelve
-  `localStorage`) y llamarla al puntuar; el HUD muestra `RÉCORD: n`.
-- **Checkpoint (01:50):** chispas al pisar y **F5**: el récord sigue ahí.
+  `localStorage`) y llamarla al puntuar; las escenas de fin muestran `RÉCORD: n`.
+- **Checkpoint (01:40):** chispas al pisar y **F5**: el récord sigue ahí.
 - **Si vamos tarde:** ver el _Modo emergencia_ de abajo.
+
+### 01:40–01:50 · D2-5 · Jefe ⭐ (opcional) — **pegar**
+
+- **Solo equipos avanzados** (requiere D2-3 y D2-4): **PEGAR** `▸ D2-5` del kit —
+  jefe (`health(6, 6)`, patrulla, barra `fixed`), proyectiles con `loop(1.5, …)`
+  y el mismo pisotón geométrico con **0.35 s de enfriamiento**.
+- **El resto, mientras tanto:** juega su partida y va afinando sus retos.
+- **Demo del instructor (al showcase):** jefe completo y **parallax** desde
+  `solucion-dia2/` — "lo que da llegar al final del código".
+- **Si nadie lo pega:** no pasa nada; el showcase enseña lo construido y la demo
+  pone el techo visible.
 
 ### 01:50–02:00 · D2-6 · Showcase (10 min) — **intocable**
 
-- Cada equipo enseña 30 s: "el detalle que más nos ha gustado".
-- El instructor juega una partida completa proyectada (objetivo: el jefe).
-- Cierre: qué hemos visto (bucle, física, colisiones, estados, parallax, vida,
-  datos persistentes), docs de KAPLAY, agradecimientos y licencias.
+- Cada equipo enseña **45 s**: su bloque estrella + una idea para mañana.
+- El instructor juega una partida completa proyectada (objetivo: el jefe, desde
+  `solucion-dia2/`, o desde el kit si alguien lo pegó).
+- Cierre: récords en pantalla, qué hemos visto (bucle, física, colisiones,
+  estados, vida, datos persistentes), docs de KAPLAY, agradecimientos y licencias.
 
 ### Modo emergencia (si el día se descuadra)
 
 Orden de prioridad si se atrasa:
 
-1. **A las 00:55 sin cerrar D2-1** → pegar `crearEnemigo` + bloque del jugador; el `col.isBottom()` se explica sobre la marcha.
-2. **A las 01:15 sin cerrar D2-2** → pegar D2-2 entero y explicarlo en 3 min.
-3. **A las 01:35 sin cerrar D2-3** → pegar `danar` y el bloque del corazón.
-4. **D2-5 se convierte en demo del instructor** (el instructor pega y explica en vivo, 5 min). **Nunca se recorta D2-4 ni el showcase**: el jefe es el cierre emocional del taller.
+1. **A las 01:00 sin cerrar D2-1** → pegar los loads + el `add()` del jugador y las 4 llamadas de enemigos.
+2. **A las 01:25 sin cerrar D2-2** → pegar D2-2 entero y explicarlo en 3 min.
+3. **A las 01:40 sin cerrar D2-3** → pegar corazones + `danar` enteros.
+4. **D2-5 (jefe) se salta como bloque** y vive solo en la demo del showcase.
+   **Nunca se recorta D2-4 ni el showcase**: partículas y récord son el cierre emocional.
 
 ---
 
@@ -240,7 +256,7 @@ Orden de prioridad si se atrasa:
 |           | **Base (obligatorio)**                                                   | **Extra (si sobra tiempo)**                                                                    |
 | --------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
 | **Día 1** | TODO 1–4: mover/saltar, enemigos+colisiones, marcador, sonidos y escenas | Retos de las 5 salas · `+100` flotante · ajuste del _feel_ de salto · `shake`/`flash`          |
-| **Día 2** | D2-1 a D2-4 + showcase                                                   | D2-5 (partículas y récord) · _squash/stretch_ al saltar · `loop()` de spawns · más plataformas |
+| **Día 2** | D2-1 a D2-4 + showcase                                                   | D2-5 (jefe ⭐) · _squash/stretch_ al saltar · parallax (demo) · más plataformas     |
 
 ## Errores típicos (y qué responder)
 
@@ -265,12 +281,13 @@ Orden de prioridad si se atrasa:
 - [ ] **`PUNTOS: 1000` = victoria** (10 pisotones) · `R` reinicia
 - [ ] En la presentación: `S` abre/cierra la solución de la sala (probado en clase)
 
-**Día 2** — en la solución o en el mejor de los equipos:
+**Día 2** — en el kit y en el mejor de los equipos:
 
-- [ ] Sprites y sonidos · cámara con parallax (capas a distintas velocidades)
+- [ ] Sprites (bean/zombean) · nivel de 2560 px recorrido con la cámara · HUD `fixed`
 - [ ] 3 corazones · daño con parpadeo (1 s de invulnerabilidad) · corazón cura
-- [ ] Barra del jefe · proyectiles a la altura del jugador · 6 golpes = victoria
-- [ ] F5 y el récord persiste · `R` reinicia
+- [ ] Chispas al pisar · F5 y el récord persiste · `R` reinicia
+- [ ] ⭐ Jefe (si alguien lo pegó): barra, proyectiles y 6 golpes = victoria; si no, demo del instructor
+- [ ] En `presentacion-dia2/`: `S` abre/cierra la solución de la sala (probado en clase)
 
 ## Licencias del material
 
